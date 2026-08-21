@@ -302,34 +302,59 @@ export default function SeashoreOceanCanvas() {
       animate();
     }
 
+        function createSolarLimbTexture(): THREE.CanvasTexture {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // Solar limb darkening gradient: incandescent core to deep amber limb
+        const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+        gradient.addColorStop(0.35, 'rgba(254, 215, 170, 0.98)');
+        gradient.addColorStop(0.75, 'rgba(249, 115, 22, 0.95)');
+        gradient.addColorStop(0.95, 'rgba(194, 65, 12, 0.9)');
+        gradient.addColorStop(1.0, 'rgba(124, 45, 18, 0.0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 128, 128);
+      }
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    }
+
     function createHorizonSun() {
-      const sunGeometry = new THREE.CircleGeometry(32, 64);
+      const sunGeometry = new THREE.PlaneGeometry(72, 72);
+      const sunTexture = createSolarLimbTexture();
       const sunMaterial = new THREE.MeshBasicMaterial({
-        color: 0xf97316,
-        side: THREE.DoubleSide,
+        map: sunTexture,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.96,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
       });
       sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
       sunMesh.position.set(38, 24, -280);
       scene.add(sunMesh);
 
-      const coronaGeo = new THREE.RingGeometry(32.5, 48, 64);
+      const coronaGeo = new THREE.RingGeometry(32.5, 52, 64);
       const coronaMat = new THREE.MeshBasicMaterial({
         color: 0xfb923c,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.32,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
       });
       const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
       sunMesh.add(coronaMesh);
 
-      const glowGeo = new THREE.RingGeometry(48.5, 78, 64);
+      const glowGeo = new THREE.RingGeometry(52.5, 84, 64);
       const glowMat = new THREE.MeshBasicMaterial({
         color: 0xfdba74,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.14,
+        blending: THREE.AdditiveBlending,
       });
       sunGlowMesh = new THREE.Mesh(glowGeo, glowMat);
       sunMesh.add(sunGlowMesh);
