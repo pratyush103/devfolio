@@ -37,6 +37,13 @@ export default function SeashoreOceanCanvas() {
 
     let activePalette: 'twilight' | 'biolum' | 'golden' = 'twilight';
 
+    // Three.js Color Lerping Targets
+    const currentSunColor = new THREE.Color(0xf97316);
+    const targetSunColor = new THREE.Color(0xf97316);
+    const currentCoronaColor = new THREE.Color(0xfb923c);
+    const targetCoronaColor = new THREE.Color(0xfb923c);
+    let paletteLerp = 1.0;
+
     // 3D Raycasted Mouse Coordinates for spherical repulsion
     const mouse = {
       x: 0,
@@ -55,8 +62,11 @@ export default function SeashoreOceanCanvas() {
     let clickCount = 0;
     let lastClickTime = 0;
 
+    /* GAME OF LIFE PHASED TRANSITION ENGINE */
     let isLifeMode = false;
-    let snapTransitionFactor = 0;
+    let waveCalmFactor = 1.0; // 1.0 = full waves, 0.0 = completely flattened calm surface
+    let snapTransitionFactor = 0; // 0 = organic wave/float, 1 = snapped to grid
+    let lifeStartedTime = 0;
     const GRID_W = 150;
     const GRID_H = 95;
     const TOTAL_WAVE_PARTICLES = GRID_W * GRID_H;
@@ -72,7 +82,6 @@ export default function SeashoreOceanCanvas() {
     let lastLifeStepTime = 0;
     const LIFE_STEP_INTERVAL = 0.15;
 
-    /* APPLY THEME COLOR TO THREE.JS & HTML DOM */
     function applyTheme(theme: 'twilight' | 'biolum' | 'golden') {
       activePalette = theme;
       setPaletteMode(theme);
@@ -80,56 +89,53 @@ export default function SeashoreOceanCanvas() {
         document.documentElement.setAttribute('data-theme', theme);
       }
 
-      if (sunMesh && sunGlowMesh) {
-        if (theme === 'biolum') {
-          (sunMesh.material as THREE.MeshBasicMaterial).color.setHex(0x06b6d4); // Electric Cyan
-          (sunGlowMesh.material as THREE.MeshBasicMaterial).color.setHex(0xa855f7); // Ultraviolet
-        } else if (theme === 'golden') {
-          (sunMesh.material as THREE.MeshBasicMaterial).color.setHex(0xf59e0b); // Golden Amber
-          (sunGlowMesh.material as THREE.MeshBasicMaterial).color.setHex(0xea580c); // Copper Flame
-        } else {
-          (sunMesh.material as THREE.MeshBasicMaterial).color.setHex(0xf97316); // Sunset Orange
-          (sunGlowMesh.material as THREE.MeshBasicMaterial).color.setHex(0xfb923c); // Warm Amber
-        }
+      if (theme === 'biolum') {
+        targetSunColor.setHex(0x06b6d4);
+        targetCoronaColor.setHex(0xa855f7);
+      } else if (theme === 'golden') {
+        targetSunColor.setHex(0xf59e0b);
+        targetCoronaColor.setHex(0xea580c);
+      } else {
+        targetSunColor.setHex(0xf97316);
+        targetCoronaColor.setHex(0xfb923c);
       }
     }
 
-    /* SNAP PARTICLES TO CONWAY'S GAME OF LIFE GRID (Correct Y-Axis) */
-    function snapParticlesToLifeGrid() {
+    /* PHASE 1 & 2: SNAP PARTICLES AND INITIATE CALMING PHASE */
+    function initiateGameOfLifeSequence() {
       lifeGrid.fill(0);
       nextLifeGrid.fill(0);
 
-      // Sample floating particles and project accurately to grid
+      // Sample floating particles
       if (oceanPositions) {
         for (let i = 0; i < DEEP_OCEAN_PARTICLES; i++) {
           const px = oceanPositions[i * 3];
           const pz = oceanPositions[i * 3 + 2];
-
           const normalizedX = (px + xSpread / 2) / xSpread;
           const normalizedZ = (zNear - pz) / (zNear - zFar);
 
           if (normalizedX >= 0 && normalizedX < 1 && normalizedZ >= 0 && normalizedZ < 1) {
             const gx = Math.min(GRID_W - 1, Math.max(0, Math.floor(normalizedX * GRID_W)));
-            // Correct Y axis: 0 is near shore, GRID_H-1 is horizon
             const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor(Math.pow(normalizedZ, 1 / 1.7) * GRID_H)));
             const idx = gy * GRID_W + gx;
             lifeGrid[idx] = 1;
-            cellAlphas[idx] = 1.0;
+            cellAlphas[idx] = 0.18; // Start faint during flattening
           }
         }
       }
 
-      // Sample wave crests
       if (wavePositions) {
         for (let idx = 0; idx < TOTAL_WAVE_PARTICLES; idx++) {
           const py = wavePositions[idx * 3 + 1];
           if (py > 2.2 || Math.random() < 0.08) {
             lifeGrid[idx] = 1;
-            cellAlphas[idx] = 1.0;
+            cellAlphas[idx] = 0.18;
           }
         }
       }
-      setCurrentPatternName('Snapped Particles');
+
+      setCurrentPatternName('Live Spatial Snapshot');
+      lifeStartedTime = clock.getElapsedTime();
     }
 
     function clearLifeGrid() {
@@ -195,7 +201,7 @@ export default function SeashoreOceanCanvas() {
     }
 
     triggerPatternRef.current = (name: string) => {
-      if (name === 'snap') snapParticlesToLifeGrid();
+      if (name === 'snap') initiateGameOfLifeSequence();
       else if (name === 'gun') seedGliderGun(25, 30);
       else if (name === 'pulsar') seedPulsarPattern(75, 45);
       else if (name === 'acorn') seedAcorn(75, 45);
@@ -458,12 +464,13 @@ export default function SeashoreOceanCanvas() {
       }
       lastClickTime = now;
 
+      // 3 clicks detected: Initiate the Calming -> Flattening -> Game of Life Sequence
       if (clickCount >= 3) {
         clickCount = 0;
         isLifeMode = !isLifeMode;
         setAutomataActive(isLifeMode);
         if (isLifeMode) {
-          snapParticlesToLifeGrid();
+          initiateGameOfLifeSequence();
         }
       }
 
@@ -479,9 +486,8 @@ export default function SeashoreOceanCanvas() {
         if (ripples.length > 5) ripples.shift();
       }
 
-      if (isLifeMode) {
+      if (isLifeMode && waveCalmFactor < 0.2) {
         const gridX = Math.floor((e.clientX / window.innerWidth) * GRID_W);
-        // Correct Screen to Y Grid mapping: Screen top = horizon (GRID_H-1), bottom = shore (0)
         const gridY = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H)));
         seedGlider(gridX, gridY);
       }
@@ -492,12 +498,11 @@ export default function SeashoreOceanCanvas() {
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
       mouse.isHovering = true;
 
-      // Project mouse into 3D world coordinates with realistic depth
       mouse.targetWorldX = mouse.x * 140;
       mouse.targetWorldY = camera.position.y + mouse.y * 90;
       mouse.targetWorldZ = camera.position.z - 110;
 
-      if (isLifeMode) {
+      if (isLifeMode && waveCalmFactor < 0.3) {
         const gx = Math.floor((e.clientX / window.innerWidth) * GRID_W);
         const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H)));
         if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
@@ -517,7 +522,7 @@ export default function SeashoreOceanCanvas() {
         mouse.targetWorldY = camera.position.y + mouse.y * 90;
         mouse.targetWorldZ = camera.position.z - 110;
 
-        if (isLifeMode) {
+        if (isLifeMode && waveCalmFactor < 0.3) {
           const gx = Math.floor((touch.clientX / window.innerWidth) * GRID_W);
           const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - touch.clientY / window.innerHeight) * GRID_H)));
           if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
@@ -547,10 +552,28 @@ export default function SeashoreOceanCanvas() {
       animationFrameId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      const targetSnap = isLifeMode ? 1.0 : 0.0;
-      snapTransitionFactor += (targetSnap - snapTransitionFactor) * 0.1;
+      // Gradual Sun & Corona Color Lerping in Three.js
+      currentSunColor.lerp(targetSunColor, 0.05);
+      currentCoronaColor.lerp(targetCoronaColor, 0.05);
+      if (sunMesh && sunGlowMesh) {
+        (sunMesh.material as THREE.MeshBasicMaterial).color.copy(currentSunColor);
+        (sunGlowMesh.material as THREE.MeshBasicMaterial).color.copy(currentCoronaColor);
+      }
 
-      if (isLifeMode && elapsed - lastLifeStepTime > LIFE_STEP_INTERVAL) {
+      /* PHASED SEQUENCE LOGIC:
+         When isLifeMode turns ON:
+         - waveCalmFactor decays from 1.0 down to 0.0 (waves calm down and flatten over ~0.8s)
+         - snapTransitionFactor increases from 0.0 up to 1.0
+         - Once waveCalmFactor is below 0.15, stepLife starts advancing generations!
+      */
+      const targetCalm = isLifeMode ? 0.0 : 1.0;
+      waveCalmFactor += (targetCalm - waveCalmFactor) * 0.045; // Smooth calming easing
+
+      const targetSnap = isLifeMode ? 1.0 : 0.0;
+      snapTransitionFactor += (targetSnap - snapTransitionFactor) * 0.05;
+
+      // Only advance Game of Life generations once waves have calmed and flattened
+      if (isLifeMode && waveCalmFactor < 0.25 && elapsed - lastLifeStepTime > LIFE_STEP_INTERVAL) {
         stepLife();
         lastLifeStepTime = elapsed;
       }
@@ -581,9 +604,10 @@ export default function SeashoreOceanCanvas() {
             const initX = waveInitialPositions[idx * 3];
             const initZ = waveInitialPositions[idx * 3 + 2];
 
-            const swell = Math.sin(initX * 0.032 + elapsed * 1.65 + initZ * 0.02) * 5.4;
-            const chop = Math.cos(initZ * 0.048 - elapsed * 1.15 + initX * 0.018) * 3.9;
-            const ripple = Math.sin((initX * 0.08 + initZ * 0.06) + elapsed * 2.2) * 1.2;
+            // Wave height modulated by waveCalmFactor (smoothly calms down and flattens!)
+            const swell = Math.sin(initX * 0.032 + elapsed * 1.65 + initZ * 0.02) * 5.4 * waveCalmFactor;
+            const chop = Math.cos(initZ * 0.048 - elapsed * 1.15 + initX * 0.018) * 3.9 * waveCalmFactor;
+            const ripple = Math.sin((initX * 0.08 + initZ * 0.06) + elapsed * 2.2) * 1.2 * waveCalmFactor;
             let baseHeight = swell + chop + ripple;
 
             const now = performance.now() / 1000;
@@ -594,7 +618,7 @@ export default function SeashoreOceanCanvas() {
                 const waveRadius = age * 65.0;
                 const waveThickness = 25.0;
                 if (Math.abs(dist - waveRadius) < waveThickness) {
-                  const strength = (1 - age / 3.0) * r.amplitude;
+                  const strength = (1 - age / 3.0) * r.amplitude * waveCalmFactor;
                   baseHeight += Math.sin((dist - waveRadius) * 0.3) * strength;
                 }
               }
@@ -602,25 +626,23 @@ export default function SeashoreOceanCanvas() {
 
             const v = iz / (GRID_H - 1);
 
-            // Distinct Palette Colors
+            // Palette colors
             let rBase = 0.15, gBase = 0.74, bBase = 0.98;
             if (activePalette === 'biolum') {
-              // Electric Neon Emerald & Deep Ultraviolet Glow
               rBase = 0.05 * (1 - v) + 0.65 * Math.pow(v, 2.5);
               gBase = 0.95 * (1 - v) + 0.25 * Math.pow(v, 2.0);
               bBase = 0.75 * (1 - v) + 0.98 * v;
             } else if (activePalette === 'golden') {
-              // Radiant Gold, Warm Amber, Copper Flame
               rBase = 0.98 * (1 - v) + 0.95 * Math.pow(v, 1.5);
               gBase = 0.65 * (1 - v) + 0.38 * Math.pow(v, 2.0);
               bBase = 0.10 * (1 - v) + 0.05 * v;
             } else {
-              // Twilight: Cyan shore into warm sunset horizon
               rBase = 0.15 * (1 - v) + 0.98 * Math.pow(v, 3.2);
               gBase = 0.74 * (1 - v) + 0.58 * Math.pow(v, 2.0);
               bBase = 0.98 * (1 - v) + 0.88 * v;
             }
 
+            // Cellular Automata Modulation (only emerges once surface flattens)
             if (isLifeMode || snapTransitionFactor > 0.01) {
               const lifeIdx = iz * GRID_W + ix;
               const isAlive = lifeGrid[lifeIdx];
@@ -628,21 +650,24 @@ export default function SeashoreOceanCanvas() {
               cellAlphas[lifeIdx] += (targetAlpha - cellAlphas[lifeIdx]) * 0.12;
 
               const alpha = cellAlphas[lifeIdx];
-              const automataHeight = alpha * 7.5 * Math.sin(elapsed * 2.0 + ix * 0.1);
+              // Subtle breathing elevation for living cells on the flat plane
+              const automataHeight = alpha * 6.5 * (1 - waveCalmFactor);
 
-              baseHeight = baseHeight * (1 - snapTransitionFactor) + automataHeight * snapTransitionFactor;
+              baseHeight += automataHeight;
 
               const rLife = rBase * 0.4 + alpha * 0.25;
               const gLife = gBase * 0.5 + alpha * 0.5;
               const bLife = bBase * 0.6 + alpha * 0.4;
 
-              waveColors[idx * 3] = rBase * (1 - snapTransitionFactor) + rLife * snapTransitionFactor;
-              waveColors[idx * 3 + 1] = gBase * (1 - snapTransitionFactor) + gLife * snapTransitionFactor;
-              waveColors[idx * 3 + 2] = bBase * (1 - snapTransitionFactor) + bLife * snapTransitionFactor;
+              // Gradual color blend
+              waveColors[idx * 3] += (rLife - waveColors[idx * 3]) * 0.08;
+              waveColors[idx * 3 + 1] += (gLife - waveColors[idx * 3 + 1]) * 0.08;
+              waveColors[idx * 3 + 2] += (bLife - waveColors[idx * 3 + 2]) * 0.08;
             } else {
-              waveColors[idx * 3] = rBase;
-              waveColors[idx * 3 + 1] = gBase;
-              waveColors[idx * 3 + 2] = bBase;
+              // Smooth gradual color lerp for theme switches
+              waveColors[idx * 3] += (rBase - waveColors[idx * 3]) * 0.08;
+              waveColors[idx * 3 + 1] += (gBase - waveColors[idx * 3 + 1]) * 0.08;
+              waveColors[idx * 3 + 2] += (bBase - waveColors[idx * 3 + 2]) * 0.08;
             }
 
             const diveOffset = scrollProgress * 32 * Math.sin((ix / GRID_W) * Math.PI);
@@ -655,7 +680,6 @@ export default function SeashoreOceanCanvas() {
         (waveParticles.material as THREE.PointsMaterial).opacity = Math.max(0.2, 0.92 - scrollProgress * 0.65);
       }
 
-      // True 3D Spherical Mouse Repulsion (NO CYLINDER ARTIFACT) with strong spring return
       if (oceanPositions) {
         mouse.worldX += (mouse.targetWorldX - mouse.worldX) * 0.12;
         mouse.worldY += (mouse.targetWorldY - mouse.worldY) * 0.12;
@@ -677,7 +701,6 @@ export default function SeashoreOceanCanvas() {
           const floatOffset = Math.sin(elapsed * 0.85 + i) * 0.35;
           const driftX = Math.cos(elapsed * 0.38 + i * 2) * 0.25;
 
-          // True 3D spherical distance calculation
           const dx = px - mouse.worldX;
           const dy = py - mouse.worldY;
           const dz = pz - mouse.worldZ;
@@ -685,23 +708,19 @@ export default function SeashoreOceanCanvas() {
 
           if (dist3D < mouseRadius && mouse.isHovering && dist3D > 0.001) {
             const force = (1 - dist3D / mouseRadius) * mouseRepelForce;
-            // Repel in 3D direction
             oceanVelocities[i3] += (dx / dist3D) * force;
             oceanVelocities[i3 + 1] += (dy / dist3D) * force;
             oceanVelocities[i3 + 2] += (dz / dist3D) * force;
           }
 
-          // Apply velocity
           px += oceanVelocities[i3];
           py += oceanVelocities[i3 + 1];
           pz += oceanVelocities[i3 + 2];
 
-          // High damping to eliminate trailing cylinders
           oceanVelocities[i3] *= 0.82;
           oceanVelocities[i3 + 1] *= 0.82;
           oceanVelocities[i3 + 2] *= 0.82;
 
-          // Smooth restorative spring back to original anchor
           px += (origX + driftX - px) * 0.06;
           py += (origY + floatOffset - py) * 0.06;
           pz += (origZ - pz) * 0.06;
@@ -710,20 +729,16 @@ export default function SeashoreOceanCanvas() {
           oceanPositions[i3 + 1] = py;
           oceanPositions[i3 + 2] = pz;
 
-          // Dynamic particle colors matching active palette
+          // Gradual color lerping for deep ocean particles
+          let tR = 0.15, tG = 0.85, tB = 0.95;
           if (activePalette === 'biolum') {
-            oceanColors[i3] = 0.05;
-            oceanColors[i3 + 1] = 0.95;
-            oceanColors[i3 + 2] = 0.65;
+            tR = 0.05; tG = 0.95; tB = 0.65;
           } else if (activePalette === 'golden') {
-            oceanColors[i3] = 0.98;
-            oceanColors[i3 + 1] = 0.65;
-            oceanColors[i3 + 2] = 0.15;
-          } else {
-            oceanColors[i3] = 0.15;
-            oceanColors[i3 + 1] = 0.85;
-            oceanColors[i3 + 2] = 0.95;
+            tR = 0.98; tG = 0.65; tB = 0.15;
           }
+          oceanColors[i3] += (tR - oceanColors[i3]) * 0.08;
+          oceanColors[i3 + 1] += (tG - oceanColors[i3 + 1]) * 0.08;
+          oceanColors[i3 + 2] += (tB - oceanColors[i3 + 2]) * 0.08;
         }
 
         oceanGeometry.attributes.position.needsUpdate = true;
@@ -757,28 +772,38 @@ export default function SeashoreOceanCanvas() {
         aria-hidden="true"
       />
 
-      {/* Palette Selector Pill (Top Left) */}
-      <div className="fixed top-20 left-6 z-40 flex items-center gap-1 p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg">
+      {/* Sliding Indicator Theme Switcher (Top Left) */}
+      <div className="fixed top-20 left-6 z-40 flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg relative">
+        {/* Animated Sliding Background Highlight Pill */}
+        <div
+          className="absolute top-1 bottom-1 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md"
+          style={{
+            left: paletteMode === 'twilight' ? '4px' : paletteMode === 'biolum' ? '70px' : '136px',
+            width: paletteMode === 'twilight' ? '62px' : paletteMode === 'biolum' ? '62px' : '62px',
+            backgroundColor: paletteMode === 'twilight' ? '#38bdf8' : paletteMode === 'biolum' ? '#10b981' : '#f59e0b',
+          }}
+        />
+
         <button
           onClick={() => setPaletteRef.current && setPaletteRef.current('twilight')}
-          className={`px-3 py-1 rounded-full text-[10px] font-semibold font-mono transition-all ${
-            paletteMode === 'twilight' ? 'bg-[#38bdf8] text-[#030712] font-bold shadow-sm' : 'text-slate-400 hover:text-white'
+          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === 'twilight' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
           }`}
         >
           Twilight
         </button>
         <button
           onClick={() => setPaletteRef.current && setPaletteRef.current('biolum')}
-          className={`px-3 py-1 rounded-full text-[10px] font-semibold font-mono transition-all ${
-            paletteMode === 'biolum' ? 'bg-[#10b981] text-[#030712] font-bold shadow-sm' : 'text-slate-400 hover:text-white'
+          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === 'biolum' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
           }`}
         >
           Biolum
         </button>
         <button
           onClick={() => setPaletteRef.current && setPaletteRef.current('golden')}
-          className={`px-3 py-1 rounded-full text-[10px] font-semibold font-mono transition-all ${
-            paletteMode === 'golden' ? 'bg-[#f59e0b] text-[#030712] font-bold shadow-sm' : 'text-slate-400 hover:text-white'
+          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === 'golden' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
           }`}
         >
           Golden
@@ -787,7 +812,7 @@ export default function SeashoreOceanCanvas() {
 
       {/* Cellular Automata HUD Controls when active */}
       {automataActive && (
-        <div className="fixed top-20 right-6 z-40 p-4 rounded-2xl bg-[#081226]/95 border border-[var(--accent-primary)]/40 backdrop-blur-xl shadow-2xl text-xs font-mono text-slate-200 flex flex-col gap-2.5">
+        <div className="fixed top-20 right-6 z-40 p-4 rounded-2xl bg-[#081226]/95 border border-[var(--accent-primary)]/40 backdrop-blur-xl shadow-2xl text-xs font-mono text-slate-200 flex flex-col gap-2.5 transition-all duration-500">
           <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
             <div className="flex items-center gap-2 text-[var(--accent-primary)] font-bold">
               <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-ping" />
@@ -797,7 +822,7 @@ export default function SeashoreOceanCanvas() {
           </div>
 
           <div className="text-[11px] text-slate-400">
-            Source: <strong className="text-white">{currentPatternName}</strong>
+            State: <strong className="text-white">Waves Calmed &amp; Snapped</strong>
           </div>
 
           <div className="flex flex-wrap gap-1.5 pt-1">
@@ -805,7 +830,7 @@ export default function SeashoreOceanCanvas() {
               onClick={() => triggerPatternRef.current && triggerPatternRef.current('snap')}
               className="px-2.5 py-1 rounded-md bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black text-[10px] font-bold transition-all"
             >
-              Re-Snap Particles
+              Re-Snap
             </button>
             <button
               onClick={() => triggerPatternRef.current && triggerPatternRef.current('gun')}
@@ -834,7 +859,7 @@ export default function SeashoreOceanCanvas() {
           </div>
 
           <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-white/5">
-            Click 3x anywhere to toggle • Particles snapped from free floating state
+            Click 3x anywhere to toggle • Phased wave calming &amp; snap transition
           </div>
         </div>
       )}
