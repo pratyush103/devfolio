@@ -26,18 +26,15 @@ def run_linter(project_dir):
 
         rel_path = os.path.relpath(file_path, project_dir)
 
-        # 1. Bracket and delimiter balancing check
         for b_open, b_close in [('{', '}'), ('(', ')'), ('[', ']')]:
             if content.count(b_open) != content.count(b_close):
                 errors.append(f"[{rel_path}] Bracket balance error: '{b_open}' ({content.count(b_open)}) vs '{b_close}' ({content.count(b_close)})")
 
-        # 2. Check for prohibited patterns
         for line_num, line in enumerate(lines, 1):
             for pattern, msg in prohibited_patterns:
                 if re.search(pattern, line):
                     errors.append(f"[{rel_path}:{line_num}] Error: {msg}")
 
-        # 3. Check for valid 'use client' on interactive components
         if any(keyword in content for keyword in ['useState', 'useEffect', 'useRef', 'window.', 'document.']):
             if not content.strip().startswith("'use client'") and not content.strip().startswith('"use client"'):
                 warnings.append(f"[{rel_path}] Missing 'use client' directive on component utilizing client-side hooks/browser APIs.")

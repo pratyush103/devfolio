@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { projectsData } from '@/data/profile';
 import { ProjectCategory, ProjectItem } from '@/types';
-import { Github, PieChart, TrendingUp, Sparkles, BarChart3, X, ExternalLink, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Github, PieChart, TrendingUp, Sparkles, BarChart3, X, CheckCircle2, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const iconMap = {
   PieChart: PieChart,
@@ -33,22 +33,22 @@ export default function Projects() {
         <div>
           <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 03. Selected Works</span>
           <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Featured Projects
+            Featured Architectures
           </h2>
           <p className="text-slate-400 text-base sm:text-lg mt-3 max-w-2xl">
-            Multi-agent AI platforms, low-latency trading engines, and enterprise anomaly detection. Click any card to inspect system architecture.
+            Stateful multi-agent systems, low-latency trading simulation engines, and automated statistical intelligence.
           </p>
         </div>
 
-        {/* Category Filters */}
+        {/* Category Filters with Sharp Deliberate Radii */}
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
               key={cat.value}
               onClick={() => setSelectedCat(cat.value)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all ${
                 selectedCat === cat.value
-                  ? 'bg-cyanAccent text-primary shadow-md shadow-cyanAccent/20'
+                  ? 'bg-[var(--accent-primary)] text-[#030712] shadow-md'
                   : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-cyanAccent/30'
               }`}
             >
@@ -58,53 +58,53 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Projects Grid */}
+      {/* Projects Grid with Loud Featured Card Hierarchy */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map((proj) => {
-          const IconComp = iconMap[proj.iconName as keyof typeof iconMap] || Sparkles;
+        {filteredProjects.map((proj, idx) => {
+          const isFeatured = idx === 0;
           return (
             <div
               key={proj.id}
               onClick={() => setActiveModalProject(proj)}
-              className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-cyanAccent/20 hover:border-cyanAccent/50 transition-all flex flex-col justify-between group hover:-translate-y-1 hover:shadow-xl hover:shadow-cyanAccent/10 cursor-pointer"
+              className={`p-6 rounded-xl backdrop-blur-xl border transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-1 ${
+                isFeatured
+                  ? 'bg-slate-900/80 border-[var(--accent-primary)]/50 shadow-xl shadow-cyanAccent/10 md:col-span-2 lg:col-span-2'
+                  : 'bg-slate-900/60 border-white/10 hover:border-cyanAccent/40'
+              }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-11 h-11 rounded-xl bg-cyanAccent/10 border border-cyanAccent/30 flex items-center justify-center text-cyanAccent group-hover:scale-105 transition-transform">
-                    <IconComp className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-tealAccent font-semibold bg-tealAccent/10 px-2 py-0.5 rounded-[3px] border border-tealAccent/20">
+                    {proj.metrics}
+                  </span>
                   {proj.githubUrl && (
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(proj.githubUrl, '_blank', 'noopener,noreferrer');
                       }}
-                      className="text-slate-400 hover:text-cyanAccent transition-colors"
+                      className="text-slate-400 hover:text-white transition-colors"
                       title="View GitHub Repository"
                     >
-                      <Github className="w-5 h-5" />
+                      <Github className="w-4 h-4" />
                     </span>
                   )}
                 </div>
 
-                <div className="text-[11px] font-mono uppercase tracking-wider text-tealAccent font-semibold mb-1">
-                  {proj.metrics}
-                </div>
-
-                <h3 className="font-heading text-xl font-bold text-white mb-3 group-hover:text-cyanAccent transition-colors flex items-center justify-between">
+                <h3 className="font-heading text-xl sm:text-2xl font-bold text-white mb-2 group-hover:theme-text-primary transition-colors flex items-center justify-between">
                   <span>{proj.title}</span>
-                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-cyanAccent" />
+                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity theme-text-primary" />
                 </h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 font-sans">
                   {proj.description}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
+              <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/5">
                 {proj.tags.map((tag, tIndex) => (
                   <span
                     key={tIndex}
-                    className="text-xs font-mono px-2.5 py-1 rounded-md bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/20"
+                    className="text-[11px] font-mono px-2 py-0.5 rounded-[4px] bg-white/5 text-slate-300 border border-white/10"
                   >
                     {tag}
                   </span>
@@ -122,14 +122,14 @@ export default function Projects() {
           onClick={() => setActiveModalProject(null)}
         >
           <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#081226] border border-cyanAccent/40 rounded-3xl p-8 shadow-2xl shadow-cyanAccent/20"
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#081226] border border-cyanAccent/40 rounded-2xl p-8 shadow-2xl shadow-cyanAccent/20"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setActiveModalProject(null)}
-              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              className="absolute top-6 right-6 w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
             <div className="text-xs font-mono uppercase tracking-widest text-tealAccent font-semibold mb-2">
@@ -140,14 +140,14 @@ export default function Projects() {
               {activeModalProject.title}
             </h3>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 font-sans">
               {activeModalProject.longDescription || activeModalProject.description}
             </p>
 
             {activeModalProject.architectureHighlights && (
               <div className="mb-6">
-                <h4 className="font-heading text-sm font-bold text-cyanAccent uppercase tracking-wider mb-3">
-                  Architecture & Engineering Highlights
+                <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+                  Architecture &amp; Engineering Highlights
                 </h4>
                 <ul className="space-y-2.5">
                   {activeModalProject.architectureHighlights.map((item, idx) => (
@@ -161,14 +161,14 @@ export default function Projects() {
             )}
 
             <div className="mb-6">
-              <h4 className="font-heading text-sm font-bold text-cyanAccent uppercase tracking-wider mb-3">
-                Tech Stack
+              <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+                Stack Components
               </h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {activeModalProject.tags.map((tag, tIdx) => (
                   <span
                     key={tIdx}
-                    className="text-xs font-mono px-3 py-1.5 rounded-lg bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/20 font-semibold"
+                    className="text-xs font-mono px-2.5 py-1 rounded-[4px] bg-white/5 text-slate-300 border border-white/10 font-semibold"
                   >
                     {tag}
                   </span>
@@ -182,10 +182,10 @@ export default function Projects() {
                   href={activeModalProject.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-lg font-mono text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center gap-2"
                 >
                   <Github className="w-4 h-4" />
-                  View GitHub
+                  View Repository
                 </a>
               )}
             </div>

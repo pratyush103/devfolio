@@ -5,7 +5,7 @@ export const profileData = {
   email: "pratyushlandekar103@gmail.com",
   location: "Mumbai, India",
   tagline: "AI Systems Engineer • MBA Tech (IT & Finance)",
-  summary: "Dual-degree candidate in Information Technology Engineering & Management at MPSTME, NMIMS Mumbai. Specializing in multi-agent AI swarms, enterprise data automation pipelines, and high-performance full-stack web applications.",
+  summary: "Dual-degree engineer at MPSTME, NMIMS Mumbai. Specializing in stateful multi-agent consensus graphs with LangGraph, asynchronous FastAPI backends, and enterprise supply chain forecasting models.",
   github: "https://github.com/pratyush103",
   linkedin: "https://www.linkedin.com/in/pratyush-landekar103",
   cgpa: "3.51 / 4.00",
@@ -19,12 +19,12 @@ export const experiencesData: ExperienceItem[] = [
     company: "Dow Chemicals",
     role: "Supply Chain Analytics Intern",
     period: "May 2026 – Sept 2026",
-    metrics: "Enterprise Forecast Optimization",
+    metrics: "ABC/XYZ Variance Segmentation",
     tools: ["Power Automate", "Power Apps", "SAP HANA", "Python", "VBA"],
     points: [
-      "Automated Exception Workflows: Engineered cloud-native pipelines (Power Automate, Power Apps) and a governed NLP agent to parse unstructured stakeholder requests into secure, validated data payloads.",
-      "Optimized Demand Forecasting: Analyzed multi-lag forecast variances across regional hubs, designing dynamic exception thresholds via ABC/XYZ segmentation to improve inventory positioning and minimize routing latency.",
-      "Logistics & Financial Tracking: Redesigned tracking matrices to isolate carrier detention trends, quantifying legally recoverable penalties versus company-absorbed strategic costs to enhance executive financial visibility."
+      "Engineered automated exception workflows using Power Automate and custom NLP parsers to convert unstructured logistics emails into verified SAP payloads.",
+      "Modeled multi-lag forecast variances across regional hubs, designing dynamic exception thresholds via ABC/XYZ inventory segmentation to optimize hub stock levels.",
+      "Constructed financial tracking models isolating carrier detention bottlenecks, separating legally recoverable penalties from strategic operational absorption."
     ]
   },
   {
@@ -32,11 +32,11 @@ export const experiencesData: ExperienceItem[] = [
     company: "ISF Analytica Informatica",
     role: "Software Developer Intern",
     period: "May 2025 – July 2025",
-    metrics: "₹1 Cr Commercial Pipeline Demo",
-    tools: ["LangChain", "FastAPI", "React", "Python", "OpenAI / Anthropic APIs"],
+    metrics: "₹1 Cr Project Pitch & Demonstration",
+    tools: ["LangChain", "FastAPI", "React", "Python", "RAG"],
     points: [
-      "Built AI Educational Modules: Developed EasyLearn V3 and Notes Buddy modules for automated K1-12 curriculum authoring, MCQ test generation, RAG-based querying, and intelligent document rewriting.",
-      "Client Pitch & Enterprise Demo: Delivered on-site demonstration at a Pune nursing institute, showcasing automated Marathi content generation and custom exam proctoring, helping advance negotiations toward a ₹1 Crore project deal."
+      "Engineered automated curriculum generation and MCQ evaluation engines for EasyLearn V3 and Notes Buddy using LangChain RAG pipelines.",
+      "Delivered live technical demonstration at a Pune nursing institute, showcasing automated Marathi medical content authoring and proctoring to advance a ₹1 Cr institutional deployment."
     ]
   },
   {
@@ -44,11 +44,11 @@ export const experiencesData: ExperienceItem[] = [
     company: "LBWOnline",
     role: "Web Developer Intern",
     period: "June 2024 – July 2024",
-    metrics: "40% Manual Entry Latency Reduction",
+    metrics: "40% Transcription Latency Reduction",
     tools: ["Laravel", "MySQL", "PHP", "JavaScript", "Tailwind CSS"],
     points: [
-      "Classical Music Platform: Developed a full-stack web application for Indian classical music notations (Laravel + MySQL) with 10+ CRUD features and role-based access control (Admin, Editor, Viewer).",
-      "Custom Notation Keyboard: Built an interactive keyboard supporting 50+ unique musical symbols, reducing manual transcription input time by ~40% and adding multilingual lyric integration."
+      "Built a full-stack Indian classical music notation platform (Laravel + MySQL) with role-based access controls for Admin, Editor, and Viewer tiers.",
+      "Developed a custom virtual notation keyboard supporting 50+ Sargam musical glyphs, reducing manual notation entry latency by ~40%."
     ]
   }
 ];
@@ -57,73 +57,73 @@ export const projectsData: ProjectItem[] = [
   {
     id: "finsight",
     title: "FinSight",
-    description: "Multi-agent educational and financial platform integrating complex architectural workflows, domain-specific insights under Indian Accounting Standards (Ind AS), and automated financial reporting.",
+    description: "Hierarchical multi-agent research platform coordinating specialized LLM nodes to parse statutory filings under Indian Accounting Standards (Ind AS) with audit-ready citations.",
     category: "ai",
     tags: ["LangGraph", "FastAPI", "Next.js", "LangSmith", "Python"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "PieChart",
-    metrics: "Multi-Agent Ind AS Architecture",
-    longDescription: "FinSight is a production-grade financial analysis ecosystem that coordinates specialized LLM agent nodes to process quarterly statements, verify regulatory compliance under Indian Accounting Standards (Ind AS), and generate audit-ready financial summaries.",
+    metrics: "LangGraph StateGraph Engine",
+    longDescription: "FinSight executes cyclical state machines with LangGraph where an orchestrator agent delegates statutory note verification, cash-flow reconciliation, and anomaly audits to domain-specific agent nodes.",
     architectureHighlights: [
-      "Hierarchical state graphs with LangGraph orchestrating specialized analyst agents.",
-      "Vector search over statutory accounting filings with strict citation grounding.",
-      "LangSmith trace instrumentation for latency, token consumption, and agent reasoning telemetry."
+      "Hierarchical state graphs with LangGraph managing inter-agent consensus and verification loops.",
+      "Strict citation-grounded RAG over statutory Ind AS accounting disclosures.",
+      "LangSmith trace instrumentation tracking token overhead and agent latency."
     ],
     keyOutcomes: [
-      "Automated extraction of financial notes and balance sheet anomalies.",
-      "Sub-2s response times via asynchronous FastAPI background workers."
+      "Automated extraction of financial statement footnotes and hidden debt disclosures.",
+      "Sub-2s response latency via asynchronous FastAPI worker pools."
     ]
   },
   {
     id: "onpaper",
     title: "OnPaper",
-    description: "High-performance, cross-platform real-time paper trading suite with simulated order books, low-latency market feeds, and interactive portfolio analytics.",
+    description: "Cross-platform paper trading suite combining a native Tauri desktop container with an in-memory .NET 8 WebAPI matching engine for low-latency simulation.",
     category: "fullstack",
-    tags: ["React + Tauri", ".NET WebAPI", "Azure", "Firebase"],
+    tags: ["React + Tauri", ".NET 8 WebAPI", "Azure", "WebSocket"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "TrendingUp",
-    metrics: "Low-Latency Simulation Engine",
-    longDescription: "OnPaper delivers institutional-grade paper trading simulation across desktop and web using Tauri and .NET WebAPI, supporting order matching algorithms, limit/stop executions, and real-time PnL tracking.",
+    metrics: "In-Memory .NET Matching Engine",
+    longDescription: "OnPaper runs simulated order books with limit/stop execution algorithms and live WebSocket market feeds, delivering desktop-native execution performance with zero memory bloat.",
     architectureHighlights: [
-      "Tauri desktop wrapper for minimal memory footprint and native OS windowing.",
+      "Tauri desktop wrapper delivering native OS windowing with <40MB RAM usage.",
       "High-throughput .NET 8 WebAPI backend handling in-memory order book matching.",
-      "Real-time WebSocket streaming for millisecond tick updates and chart rendering."
+      "Sub-millisecond local tick streaming and portfolio equity calculations."
     ],
     keyOutcomes: [
-      "Zero slippage simulation across multi-asset portfolios.",
-      "Cross-platform support across Windows, macOS, and Linux."
+      "Zero-slippage order matching simulation across multi-asset portfolios.",
+      "Cross-platform parity across Windows, macOS, and Linux."
     ]
   },
   {
     id: "insight-forge",
     title: "Insight Forge",
-    description: "Multi-agent AI dashboard generator featuring autonomous dataset ingestion, schema inference, statistical anomaly detection, and automated interactive visual dashboard rendering.",
+    description: "Autonomous dataset intelligence pipeline that profiles tabular schemas, identifies statistical skewness, and compiles interactive visualization code without manual configuration.",
     category: "ai",
     tags: ["LangGraph", "Streamlit", "Ollama", "Python"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "Sparkles",
-    metrics: "Automated Data Discovery",
-    longDescription: "Insight Forge autonomously ingests raw CSV/Parquet datasets, infers statistical relationships and column correlations, and synthesizes dynamic, publication-ready analytics dashboards without manual configuration.",
+    metrics: "Autonomous Schema Profiler",
+    longDescription: "Insight Forge ingests raw CSV/Parquet uploads, runs statistical distribution analysis, and writes verified Plotly/Streamlit dashboard code through local Ollama LLM execution.",
     architectureHighlights: [
-      "Autonomous data profiling agent detecting skewness, missing values, and outliers.",
-      "Code generation agent writing executable Plotly and Streamlit visualization code.",
-      "Local LLM execution with Ollama for zero-cloud data privacy compliance."
+      "Autonomous data profiling agent detecting missing value correlations and outliers.",
+      "Code generation agent writing executable Plotly data visualizations.",
+      "Local LLM execution with Ollama ensuring zero-cloud privacy compliance."
     ],
     keyOutcomes: [
-      "Instant automated dashboard generation from raw tabular uploads.",
-      "Fully self-hosted and privacy-preserving architecture."
+      "Instant automated dashboard compilation from raw tabular datasets.",
+      "Fully self-hosted and privacy-compliant architecture."
     ]
   },
   {
     id: "supply-chain-analytics",
-    title: "Enterprise Supply Chain Forecasting",
+    title: "Enterprise Demand Forecasting",
     description: "Multi-lag forecast variance analyzer using ABC/XYZ inventory segmentation and automated exception routing designed for large-scale enterprise logistics.",
     category: "analytics",
-    tags: ["Power Automate", "Power Apps", "SAP HANA", "Python", "Excel/VBA"],
+    tags: ["Power Automate", "SAP HANA", "Python", "Excel/VBA"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "BarChart3",
-    metrics: "ABC/XYZ Segmentation",
-    longDescription: "Engineered at Fortune 100 enterprise scale to analyze forecast variance across multi-regional distribution networks, dynamically segmenting SKUs by volatility and automating carrier detention penalty recovery.",
+    metrics: "ABC/XYZ Variance Segmentation",
+    longDescription: "Engineered at Fortune 100 enterprise scale (Dow) to analyze multi-lag forecast accuracy across regional distribution hubs, automating carrier detention penalty quantification.",
     architectureHighlights: [
       "ABC/XYZ segmentation algorithms classifying inventory positioning priorities.",
       "Power Automate cloud flows integrating SAP HANA enterprise data layers.",
