@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { accoladesData } from '@/data/profile';
 import { AccoladeItem } from '@/types';
-import { Trophy, Award, BookOpen, Scroll, X, CheckCircle2, ChevronRight } from 'lucide-react';
+import { X, CheckCircle2, ArrowUpRight } from 'lucide-react';
 
-const iconMap = {
-  Trophy: Trophy,
-  Award: Award,
-  BookOpen: BookOpen,
-  Scroll: Scroll,
+const domainStamps: Record<string, { stamp: string; code: string }> = {
+  'sih-2025': { stamp: 'SPATIAL OCEAN AI', code: 'ARGO::3D_THERMOCLINE' },
+  'sih-2024': { stamp: 'BLOCKCHAIN OCR', code: 'ETH::SMART_ATTEST' },
+  'fiscal-growth-paper': { stamp: 'ECONOMETRICS', code: 'REGRESSION::10YR_OLS' },
+  'carvaan-case-study': { stamp: 'MARKET STRATEGY', code: 'BIZ_CASE::UNIT_MARGINS' },
 };
 
 export default function Accolades() {
@@ -17,40 +17,54 @@ export default function Accolades() {
 
   return (
     <section id="accolades" className="max-w-6xl mx-auto px-6 py-24 relative z-10">
-      <div className="mb-14">
-        <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 05. Honors & Research</span>
+      <div className="mb-12">
+        <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 05. Honors &amp; Research</span>
         <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-          Hackathons & Publications
+          Hackathons &amp; Publications
         </h2>
         <p className="text-slate-400 text-base sm:text-lg mt-3 max-w-2xl">
-          National hackathon recognitions, macroeconomic publications, and business strategy research. Click to view full methodology.
+          National hackathon recognitions, econometric publications, and strategic business analysis. Click any record to inspect methodology.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {accoladesData.map((item) => {
-          const IconComp = iconMap[item.icon as keyof typeof iconMap] || Trophy;
+          const meta = domainStamps[item.id] || { stamp: 'RESEARCH', code: 'METRICS::VERIFIED' };
           return (
             <div
               key={item.id}
               onClick={() => setActiveModalItem(item)}
-              className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-cyanAccent/20 hover:border-cyanAccent/50 transition-all flex gap-4 cursor-pointer group hover:-translate-y-1 hover:shadow-xl hover:shadow-cyanAccent/10"
+              className="p-6 rounded-xl bg-slate-900/60 backdrop-blur-xl border border-white/10 hover:border-cyanAccent/40 transition-all flex flex-col justify-between cursor-pointer group hover:-translate-y-1 hover:shadow-xl hover:shadow-cyanAccent/10"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-105 transition-transform">
-                <IconComp className="w-6 h-6" />
-              </div>
-              <div className="flex-1">
-                {item.tag && (
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-tealAccent font-semibold mb-1 block">
-                    {item.tag}
+              <div>
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/5 font-mono text-[10px]">
+                  <span className="px-2 py-0.5 rounded-[3px] bg-tealAccent/10 text-tealAccent border border-tealAccent/20 font-bold uppercase tracking-wider">
+                    {meta.stamp}
                   </span>
-                )}
-                <h3 className="font-bold text-white text-base mb-1 group-hover:text-cyanAccent transition-colors flex items-center justify-between">
+                  <span className="text-slate-500">{meta.code}</span>
+                </div>
+
+                <h3 className="font-heading text-lg font-bold text-white mb-2 group-hover:theme-text-primary transition-colors flex items-center justify-between">
                   <span>{item.title}</span>
-                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-cyanAccent" />
+                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity theme-text-primary" />
                 </h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{item.description}</p>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4 font-sans">
+                  {item.description}
+                </p>
               </div>
+
+              {item.techOrMethodology && (
+                <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/5">
+                  {item.techOrMethodology.map((tech, tIdx) => (
+                    <span
+                      key={tIdx}
+                      className="text-[10px] font-mono px-2 py-0.5 rounded-[3px] bg-white/5 text-slate-300 border border-white/10"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -63,38 +77,36 @@ export default function Accolades() {
           onClick={() => setActiveModalItem(null)}
         >
           <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#081226] border border-cyanAccent/40 rounded-3xl p-8 shadow-2xl shadow-cyanAccent/20"
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#081226] border border-cyanAccent/40 rounded-2xl p-8 shadow-2xl shadow-cyanAccent/20"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setActiveModalItem(null)}
-              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              className="absolute top-6 right-6 w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {activeModalItem.tag && (
-              <div className="text-xs font-mono uppercase tracking-widest text-tealAccent font-semibold mb-2">
-                {activeModalItem.tag}
-              </div>
-            )}
+            <div className="text-xs font-mono uppercase tracking-widest text-tealAccent font-semibold mb-2">
+              {activeModalItem.tag}
+            </div>
 
             <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white mb-4">
               {activeModalItem.title}
             </h3>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 font-sans">
               {activeModalItem.fullOverview || activeModalItem.description}
             </p>
 
             {activeModalItem.keyContributions && (
               <div className="mb-6">
-                <h4 className="font-heading text-sm font-bold text-cyanAccent uppercase tracking-wider mb-3">
-                  Key Deliverables & Innovations
+                <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+                  Key Deliverables &amp; Innovations
                 </h4>
                 <ul className="space-y-2.5">
                   {activeModalItem.keyContributions.map((point, idx) => (
-                    <li key={idx} className="text-slate-300 text-sm flex items-start gap-2.5">
+                    <li key={idx} className="text-slate-300 text-sm flex items-start gap-2.5 font-sans">
                       <CheckCircle2 className="w-4 h-4 text-tealAccent shrink-0 mt-0.5" />
                       <span>{point}</span>
                     </li>
@@ -105,14 +117,14 @@ export default function Accolades() {
 
             {activeModalItem.techOrMethodology && (
               <div>
-                <h4 className="font-heading text-sm font-bold text-cyanAccent uppercase tracking-wider mb-3">
-                  Tools & Methodologies
+                <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+                  Tools &amp; Methodologies
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {activeModalItem.techOrMethodology.map((tech, tIdx) => (
                     <span
                       key={tIdx}
-                      className="text-xs font-mono px-3 py-1.5 rounded-lg bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/20 font-semibold"
+                      className="text-xs font-mono px-2.5 py-1 rounded-[4px] bg-white/5 text-slate-300 border border-white/10 font-semibold"
                     >
                       {tech}
                     </span>
