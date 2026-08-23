@@ -23,7 +23,7 @@ export default function CausticsOverlay() {
       className="fixed inset-0 pointer-events-none z-[1] transition-opacity duration-300"
       style={{
         opacity: opacity,
-        backgroundImage: `radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.4) 0%, rgba(45, 212, 191, 0.15) 45%, transparent 70%)`,
+        backgroundImage: 'radial-gradient(ellipse at 50% 0%, var(--caustic-color-1, rgba(56, 189, 248, 0.4)) 0%, var(--caustic-color-2, rgba(45, 212, 191, 0.15)) 45%, transparent 70%)',
         mixBlendMode: 'screen',
       }}
       aria-hidden="true"

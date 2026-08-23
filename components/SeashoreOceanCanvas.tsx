@@ -1,16 +1,22 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
 export default function SeashoreOceanCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [automataActive, setAutomataActive] = useState<boolean>(false);
-  const [currentPatternName, setCurrentPatternName] = useState<string>('Snapped Particles');
-  const [paletteMode, setPaletteMode] = useState<'twilight' | 'biolum' | 'golden'>('twilight');
+  const [currentPatternName, setCurrentPatternName] =
+    useState<string>("Snapped Particles");
+  const [paletteMode, setPaletteMode] = useState<
+    "twilight" | "biolum" | "golden" | "mono"
+  >("twilight");
+  const [hudCollapsed, setHudCollapsed] = useState<boolean>(false);
 
   const triggerPatternRef = useRef<((name: string) => void) | null>(null);
-  const setPaletteRef = useRef<((mode: 'twilight' | 'biolum' | 'golden') => void) | null>(null);
+  const setPaletteRef = useRef<
+    ((mode: "twilight" | "biolum" | "golden" | "mono") => void) | null
+  >(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -35,14 +41,13 @@ export default function SeashoreOceanCanvas() {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    let activePalette: 'twilight' | 'biolum' | 'golden' = 'twilight';
+    let activePalette: "twilight" | "biolum" | "golden" | "mono" = "twilight";
 
     // Three.js Color Lerping Targets
     const currentSunColor = new THREE.Color(0xf97316);
     const targetSunColor = new THREE.Color(0xf97316);
     const currentCoronaColor = new THREE.Color(0xfb923c);
     const targetCoronaColor = new THREE.Color(0xfb923c);
-    let paletteLerp = 1.0;
 
     // 3D Raycasted Mouse Coordinates for spherical repulsion
     const mouse = {
@@ -57,7 +62,12 @@ export default function SeashoreOceanCanvas() {
       isHovering: false,
     };
 
-    const ripples: { x: number; z: number; startTime: number; amplitude: number }[] = [];
+    const ripples: {
+      x: number;
+      z: number;
+      startTime: number;
+      amplitude: number;
+    }[] = [];
 
     let clickCount = 0;
     let lastClickTime = 0;
@@ -82,22 +92,33 @@ export default function SeashoreOceanCanvas() {
     let lastLifeStepTime = 0;
     const LIFE_STEP_INTERVAL = 0.15;
 
-    function applyTheme(theme: 'twilight' | 'biolum' | 'golden') {
+    function applyTheme(theme: "twilight" | "biolum" | "golden" | "mono") {
       activePalette = theme;
       setPaletteMode(theme);
-      if (typeof document !== 'undefined') {
-        document.documentElement.setAttribute('data-theme', theme);
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-theme", theme);
       }
 
-      if (theme === 'biolum') {
+      if (theme === "mono") {
+        targetSunColor.setHex(0xffffff);
+        targetCoronaColor.setHex(0xffffff);
+        if (renderer) renderer.setClearColor(0x000000, 1);
+        if (scene) scene.fog = new THREE.FogExp2(0x000000, 0.0018);
+      } else if (theme === "biolum") {
         targetSunColor.setHex(0x06b6d4);
         targetCoronaColor.setHex(0xa855f7);
-      } else if (theme === 'golden') {
+        if (renderer) renderer.setClearColor(0x020f0d, 1);
+        if (scene) scene.fog = new THREE.FogExp2(0x020f0d, 0.0018);
+      } else if (theme === "golden") {
         targetSunColor.setHex(0xf59e0b);
         targetCoronaColor.setHex(0xea580c);
+        if (renderer) renderer.setClearColor(0x0f0a03, 1);
+        if (scene) scene.fog = new THREE.FogExp2(0x0f0a03, 0.0018);
       } else {
         targetSunColor.setHex(0xf97316);
         targetCoronaColor.setHex(0xfb923c);
+        if (renderer) renderer.setClearColor(0x030712, 1);
+        if (scene) scene.fog = new THREE.FogExp2(0x030712, 0.0018);
       }
     }
 
@@ -114,12 +135,23 @@ export default function SeashoreOceanCanvas() {
           const normalizedX = (px + xSpread / 2) / xSpread;
           const normalizedZ = (zNear - pz) / (zNear - zFar);
 
-          if (normalizedX >= 0 && normalizedX < 1 && normalizedZ >= 0 && normalizedZ < 1) {
-            const gx = Math.min(GRID_W - 1, Math.max(0, Math.floor(normalizedX * GRID_W)));
-            const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor(Math.pow(normalizedZ, 1 / 1.7) * GRID_H)));
+          if (
+            normalizedX >= 0 &&
+            normalizedX < 1 &&
+            normalizedZ >= 0 &&
+            normalizedZ < 1
+          ) {
+            const gx = Math.min(
+              GRID_W - 1,
+              Math.max(0, Math.floor(normalizedX * GRID_W))
+            );
+            const gy = Math.min(
+              GRID_H - 1,
+              Math.max(0, Math.floor(Math.pow(normalizedZ, 1 / 1.7) * GRID_H))
+            );
             const idx = gy * GRID_W + gx;
             lifeGrid[idx] = 1;
-            cellAlphas[idx] = 0.18; // Start faint during flattening
+            cellAlphas[idx] = 0.18;
           }
         }
       }
@@ -134,7 +166,7 @@ export default function SeashoreOceanCanvas() {
         }
       }
 
-      setCurrentPatternName('Live Spatial Snapshot');
+      setCurrentPatternName("Live Spatial Snapshot");
       lifeStartedTime = clock.getElapsedTime();
     }
 
@@ -150,16 +182,48 @@ export default function SeashoreOceanCanvas() {
         lifeGrid[i] = Math.random() < 0.2 ? 1 : 0;
         cellAlphas[i] = lifeGrid[i] ? 1.0 : 0.15;
       }
-      setCurrentPatternName('Random Density');
+      setCurrentPatternName("Random Density");
     }
 
     function seedGliderGun(startX = 20, startY = 25) {
       clearLifeGrid();
       const gunCoords = [
-        [24,0],[22,1],[24,1],[12,2],[13,2],[20,2],[21,2],[34,2],[35,2],
-        [11,3],[15,3],[20,3],[21,3],[34,3],[35,3],[0,4],[1,4],[10,4],[16,4],[20,4],[21,4],
-        [0,5],[1,5],[10,5],[14,5],[16,5],[17,5],[22,5],[24,5],[10,6],[16,6],[24,6],
-        [11,7],[15,7],[12,8],[13,8]
+        [24, 0],
+        [22, 1],
+        [24, 1],
+        [12, 2],
+        [13, 2],
+        [20, 2],
+        [21, 2],
+        [34, 2],
+        [35, 2],
+        [11, 3],
+        [15, 3],
+        [20, 3],
+        [21, 3],
+        [34, 3],
+        [35, 3],
+        [0, 4],
+        [1, 4],
+        [10, 4],
+        [16, 4],
+        [20, 4],
+        [21, 4],
+        [0, 5],
+        [1, 5],
+        [10, 5],
+        [14, 5],
+        [16, 5],
+        [17, 5],
+        [22, 5],
+        [24, 5],
+        [10, 6],
+        [16, 6],
+        [24, 6],
+        [11, 7],
+        [15, 7],
+        [12, 8],
+        [13, 8],
       ];
       for (const [gx, gy] of gunCoords) {
         const x = (startX + gx) % GRID_W;
@@ -167,19 +231,27 @@ export default function SeashoreOceanCanvas() {
         lifeGrid[y * GRID_W + x] = 1;
         cellAlphas[y * GRID_W + x] = 1.0;
       }
-      setCurrentPatternName('Gosper Glider Gun');
+      setCurrentPatternName("Gosper Glider Gun");
     }
 
     function seedAcorn(cx = 75, cy = 45) {
       clearLifeGrid();
-      const acornCoords = [[1,0],[3,1],[0,2],[1,2],[4,2],[5,2],[6,2]];
+      const acornCoords = [
+        [1, 0],
+        [3, 1],
+        [0, 2],
+        [1, 2],
+        [4, 2],
+        [5, 2],
+        [6, 2],
+      ];
       for (const [gx, gy] of acornCoords) {
         const x = (cx + gx) % GRID_W;
         const y = (cy + gy) % GRID_H;
         lifeGrid[y * GRID_W + x] = 1;
         cellAlphas[y * GRID_W + x] = 1.0;
       }
-      setCurrentPatternName('Acorn (Methuselah)');
+      setCurrentPatternName("Acorn (Methuselah)");
     }
 
     function seedPulsarPattern(cx = 75, cy = 45) {
@@ -197,22 +269,24 @@ export default function SeashoreOceanCanvas() {
           lifeGrid[y2 * GRID_W + x2] = 1;
         }
       }
-      setCurrentPatternName('Pulsar Oscillator');
+      setCurrentPatternName("Pulsar Oscillator");
     }
 
     triggerPatternRef.current = (name: string) => {
-      if (name === 'snap') initiateGameOfLifeSequence();
-      else if (name === 'gun') seedGliderGun(25, 30);
-      else if (name === 'pulsar') seedPulsarPattern(75, 45);
-      else if (name === 'acorn') seedAcorn(75, 45);
-      else if (name === 'random') seedRandom();
-      else if (name === 'clear') {
+      if (name === "snap") initiateGameOfLifeSequence();
+      else if (name === "gun") seedGliderGun(25, 30);
+      else if (name === "pulsar") seedPulsarPattern(75, 45);
+      else if (name === "acorn") seedAcorn(75, 45);
+      else if (name === "random") seedRandom();
+      else if (name === "clear") {
         clearLifeGrid();
-        setCurrentPatternName('Cleared');
+        setCurrentPatternName("Cleared");
       }
     };
 
-    setPaletteRef.current = (mode: 'twilight' | 'biolum' | 'golden') => {
+    setPaletteRef.current = (
+      mode: "twilight" | "biolum" | "golden" | "mono"
+    ) => {
       applyTheme(mode);
     };
 
@@ -249,9 +323,9 @@ export default function SeashoreOceanCanvas() {
           const alive = lifeGrid[idx];
 
           if (alive === 1) {
-            nextLifeGrid[idx] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+            nextLifeGrid[idx] = neighbors === 2 || neighbors === 3 ? 1 : 0;
           } else {
-            nextLifeGrid[idx] = (neighbors === 3) ? 1 : 0;
+            nextLifeGrid[idx] = neighbors === 3 ? 1 : 0;
           }
         }
       }
@@ -276,45 +350,44 @@ export default function SeashoreOceanCanvas() {
       renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
-        powerPreference: 'high-performance',
+        powerPreference: "high-performance",
       });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x030712, 1);
 
       if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+        containerRef.current.innerHTML = "";
         containerRef.current.appendChild(renderer.domElement);
       }
 
       createHorizonSun();
       createSeashoreWaveParticles();
       createDeepOceanParticles();
-      applyTheme('twilight');
+      applyTheme("twilight");
 
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('touchmove', handleTouchMove, { passive: true });
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      window.addEventListener('click', handleClick);
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("touchmove", handleTouchMove, { passive: true });
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("click", handleClick);
 
       handleScroll();
       animate();
     }
 
-        function createSolarLimbTexture(): THREE.CanvasTexture {
-      const canvas = document.createElement('canvas');
+    function createSolarLimbTexture(): THREE.CanvasTexture {
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
-        // Solar limb darkening gradient: incandescent core to deep amber limb
         const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-        gradient.addColorStop(0.35, 'rgba(254, 215, 170, 0.98)');
-        gradient.addColorStop(0.75, 'rgba(249, 115, 22, 0.95)');
-        gradient.addColorStop(0.95, 'rgba(194, 65, 12, 0.9)');
-        gradient.addColorStop(1.0, 'rgba(124, 45, 18, 0.0)');
+        gradient.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+        gradient.addColorStop(0.35, "rgba(255, 255, 255, 0.96)");
+        gradient.addColorStop(0.75, "rgba(255, 255, 255, 0.85)");
+        gradient.addColorStop(0.95, "rgba(255, 255, 255, 0.5)");
+        gradient.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 128, 128);
       }
@@ -361,16 +434,16 @@ export default function SeashoreOceanCanvas() {
     }
 
     function createGlowPointTexture(): THREE.CanvasTexture {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 64;
       canvas.height = 64;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.2, 'rgba(215, 245, 255, 0.9)');
-        gradient.addColorStop(0.55, 'rgba(56, 189, 248, 0.4)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        gradient.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+        gradient.addColorStop(0.25, "rgba(255, 255, 255, 0.85)");
+        gradient.addColorStop(0.6, "rgba(255, 255, 255, 0.3)");
+        gradient.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 64, 64);
       }
@@ -417,8 +490,14 @@ export default function SeashoreOceanCanvas() {
         }
       }
 
-      waveGeometry.setAttribute('position', new THREE.BufferAttribute(wavePositions, 3));
-      waveGeometry.setAttribute('color', new THREE.BufferAttribute(waveColors, 3));
+      waveGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(wavePositions, 3)
+      );
+      waveGeometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(waveColors, 3)
+      );
 
       const waveMaterial = new THREE.PointsMaterial({
         size: 3.3,
@@ -463,8 +542,14 @@ export default function SeashoreOceanCanvas() {
         oceanColors[i * 3 + 2] = 0.95;
       }
 
-      oceanGeometry.setAttribute('position', new THREE.BufferAttribute(oceanPositions, 3));
-      oceanGeometry.setAttribute('color', new THREE.BufferAttribute(oceanColors, 3));
+      oceanGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(oceanPositions, 3)
+      );
+      oceanGeometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(oceanColors, 3)
+      );
 
       const oceanMaterial = new THREE.PointsMaterial({
         size: 3.8,
@@ -513,7 +598,10 @@ export default function SeashoreOceanCanvas() {
 
       if (isLifeMode && waveCalmFactor < 0.2) {
         const gridX = Math.floor((e.clientX / window.innerWidth) * GRID_W);
-        const gridY = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H)));
+        const gridY = Math.min(
+          GRID_H - 1,
+          Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H))
+        );
         seedGlider(gridX, gridY);
       }
     }
@@ -529,7 +617,10 @@ export default function SeashoreOceanCanvas() {
 
       if (isLifeMode && waveCalmFactor < 0.3) {
         const gx = Math.floor((e.clientX / window.innerWidth) * GRID_W);
-        const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H)));
+        const gy = Math.min(
+          GRID_H - 1,
+          Math.max(0, Math.floor((1 - e.clientY / window.innerHeight) * GRID_H))
+        );
         if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
           lifeGrid[gy * GRID_W + gx] = 1;
           cellAlphas[gy * GRID_W + gx] = 1.0;
@@ -549,7 +640,13 @@ export default function SeashoreOceanCanvas() {
 
         if (isLifeMode && waveCalmFactor < 0.3) {
           const gx = Math.floor((touch.clientX / window.innerWidth) * GRID_W);
-          const gy = Math.min(GRID_H - 1, Math.max(0, Math.floor((1 - touch.clientY / window.innerHeight) * GRID_H)));
+          const gy = Math.min(
+            GRID_H - 1,
+            Math.max(
+              0,
+              Math.floor((1 - touch.clientY / window.innerHeight) * GRID_H)
+            )
+          );
           if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
             lifeGrid[gy * GRID_W + gx] = 1;
           }
@@ -559,8 +656,14 @@ export default function SeashoreOceanCanvas() {
 
     function handleScroll() {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      targetScrollProgress = Math.min(1, Math.max(0, scrollY / (window.innerHeight * 1.5)));
+      const maxScroll = Math.max(
+        1,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+      targetScrollProgress = Math.min(
+        1,
+        Math.max(0, scrollY / (window.innerHeight * 1.5))
+      );
     }
 
     function handleResize() {
@@ -578,11 +681,23 @@ export default function SeashoreOceanCanvas() {
       const elapsed = clock.getElapsedTime();
 
       // Gradual Sun & Corona Color Lerping in Three.js
-      currentSunColor.lerp(targetSunColor, 0.05);
-      currentCoronaColor.lerp(targetCoronaColor, 0.05);
-      if (sunMesh && sunGlowMesh) {
-        (sunMesh.material as THREE.MeshBasicMaterial).color.copy(currentSunColor);
-        (sunGlowMesh.material as THREE.MeshBasicMaterial).color.copy(currentCoronaColor);
+      currentSunColor.lerp(targetSunColor, 0.06);
+      currentCoronaColor.lerp(targetCoronaColor, 0.06);
+      if (sunMesh) {
+        (sunMesh.material as THREE.MeshBasicMaterial).color.copy(
+          currentSunColor
+        );
+        if (sunMesh.children.length > 0) {
+          (
+            (sunMesh.children[0] as THREE.Mesh)
+              .material as THREE.MeshBasicMaterial
+          ).color.copy(currentCoronaColor);
+        }
+        if (sunGlowMesh) {
+          (sunGlowMesh.material as THREE.MeshBasicMaterial).color.copy(
+            currentCoronaColor
+          );
+        }
       }
 
       /* PHASED SEQUENCE LOGIC:
@@ -598,7 +713,11 @@ export default function SeashoreOceanCanvas() {
       snapTransitionFactor += (targetSnap - snapTransitionFactor) * 0.05;
 
       // Only advance Game of Life generations once waves have calmed and flattened
-      if (isLifeMode && waveCalmFactor < 0.25 && elapsed - lastLifeStepTime > LIFE_STEP_INTERVAL) {
+      if (
+        isLifeMode &&
+        waveCalmFactor < 0.25 &&
+        elapsed - lastLifeStepTime > LIFE_STEP_INTERVAL
+      ) {
         stepLife();
         lastLifeStepTime = elapsed;
       }
@@ -618,7 +737,8 @@ export default function SeashoreOceanCanvas() {
         const sunOpacity = Math.max(0, 0.95 - scrollProgress * 1.5);
         (sunMesh.material as THREE.MeshBasicMaterial).opacity = sunOpacity;
         if (sunGlowMesh) {
-          (sunGlowMesh.material as THREE.MeshBasicMaterial).opacity = sunOpacity * 0.2;
+          (sunGlowMesh.material as THREE.MeshBasicMaterial).opacity =
+            sunOpacity * 0.2;
         }
       }
 
@@ -630,9 +750,18 @@ export default function SeashoreOceanCanvas() {
             const initZ = waveInitialPositions[idx * 3 + 2];
 
             // Wave height modulated by waveCalmFactor (smoothly calms down and flattens!)
-            const swell = Math.sin(initX * 0.032 + elapsed * 1.65 + initZ * 0.02) * 5.4 * waveCalmFactor;
-            const chop = Math.cos(initZ * 0.048 - elapsed * 1.15 + initX * 0.018) * 3.9 * waveCalmFactor;
-            const ripple = Math.sin((initX * 0.08 + initZ * 0.06) + elapsed * 2.2) * 1.2 * waveCalmFactor;
+            const swell =
+              Math.sin(initX * 0.032 + elapsed * 1.65 + initZ * 0.02) *
+              5.4 *
+              waveCalmFactor;
+            const chop =
+              Math.cos(initZ * 0.048 - elapsed * 1.15 + initX * 0.018) *
+              3.9 *
+              waveCalmFactor;
+            const ripple =
+              Math.sin(initX * 0.08 + initZ * 0.06 + elapsed * 2.2) *
+              1.2 *
+              waveCalmFactor;
             let baseHeight = swell + chop + ripple;
 
             const now = performance.now() / 1000;
@@ -643,7 +772,8 @@ export default function SeashoreOceanCanvas() {
                 const waveRadius = age * 65.0;
                 const waveThickness = 25.0;
                 if (Math.abs(dist - waveRadius) < waveThickness) {
-                  const strength = (1 - age / 3.0) * r.amplitude * waveCalmFactor;
+                  const strength =
+                    (1 - age / 3.0) * r.amplitude * waveCalmFactor;
                   baseHeight += Math.sin((dist - waveRadius) * 0.3) * strength;
                 }
               }
@@ -652,15 +782,21 @@ export default function SeashoreOceanCanvas() {
             const v = iz / (GRID_H - 1);
 
             // Palette colors
-            let rBase = 0.15, gBase = 0.74, bBase = 0.98;
-            if (activePalette === 'biolum') {
+            let rBase = 0.15,
+              gBase = 0.74,
+              bBase = 0.98;
+            if (activePalette === "mono") {
+              rBase = 1.0;
+              gBase = 1.0;
+              bBase = 1.0;
+            } else if (activePalette === "biolum") {
               rBase = 0.05 * (1 - v) + 0.65 * Math.pow(v, 2.5);
               gBase = 0.95 * (1 - v) + 0.25 * Math.pow(v, 2.0);
               bBase = 0.75 * (1 - v) + 0.98 * v;
-            } else if (activePalette === 'golden') {
+            } else if (activePalette === "golden") {
               rBase = 0.98 * (1 - v) + 0.95 * Math.pow(v, 1.5);
               gBase = 0.65 * (1 - v) + 0.38 * Math.pow(v, 2.0);
-              bBase = 0.10 * (1 - v) + 0.05 * v;
+              bBase = 0.1 * (1 - v) + 0.05 * v;
             } else {
               rBase = 0.15 * (1 - v) + 0.98 * Math.pow(v, 3.2);
               gBase = 0.74 * (1 - v) + 0.58 * Math.pow(v, 2.0);
@@ -680,29 +816,42 @@ export default function SeashoreOceanCanvas() {
 
               baseHeight += automataHeight;
 
-              const rLife = rBase * 0.4 + alpha * 0.25;
-              const gLife = gBase * 0.5 + alpha * 0.5;
-              const bLife = bBase * 0.6 + alpha * 0.4;
+              let rLife = rBase * 0.4 + alpha * 0.25;
+              let gLife = gBase * 0.5 + alpha * 0.5;
+              let bLife = bBase * 0.6 + alpha * 0.4;
+              if (activePalette === "mono") {
+                rLife = 0.3 + alpha * 0.7;
+                gLife = 0.3 + alpha * 0.7;
+                bLife = 0.3 + alpha * 0.7;
+              }
 
               // Gradual color blend
               waveColors[idx * 3] += (rLife - waveColors[idx * 3]) * 0.08;
-              waveColors[idx * 3 + 1] += (gLife - waveColors[idx * 3 + 1]) * 0.08;
-              waveColors[idx * 3 + 2] += (bLife - waveColors[idx * 3 + 2]) * 0.08;
+              waveColors[idx * 3 + 1] +=
+                (gLife - waveColors[idx * 3 + 1]) * 0.08;
+              waveColors[idx * 3 + 2] +=
+                (bLife - waveColors[idx * 3 + 2]) * 0.08;
             } else {
               // Smooth gradual color lerp for theme switches
               waveColors[idx * 3] += (rBase - waveColors[idx * 3]) * 0.08;
-              waveColors[idx * 3 + 1] += (gBase - waveColors[idx * 3 + 1]) * 0.08;
-              waveColors[idx * 3 + 2] += (bBase - waveColors[idx * 3 + 2]) * 0.08;
+              waveColors[idx * 3 + 1] +=
+                (gBase - waveColors[idx * 3 + 1]) * 0.08;
+              waveColors[idx * 3 + 2] +=
+                (bBase - waveColors[idx * 3 + 2]) * 0.08;
             }
 
-            const diveOffset = scrollProgress * 32 * Math.sin((ix / GRID_W) * Math.PI);
+            const diveOffset =
+              scrollProgress * 32 * Math.sin((ix / GRID_W) * Math.PI);
             wavePositions[idx * 3 + 1] = baseHeight - diveOffset;
             idx++;
           }
         }
         waveGeometry.attributes.position.needsUpdate = true;
         waveGeometry.attributes.color.needsUpdate = true;
-        (waveParticles.material as THREE.PointsMaterial).opacity = Math.max(0.2, 0.92 - scrollProgress * 0.65);
+        (waveParticles.material as THREE.PointsMaterial).opacity = Math.max(
+          0.2,
+          0.92 - scrollProgress * 0.65
+        );
       }
 
       if (oceanPositions) {
@@ -754,12 +903,64 @@ export default function SeashoreOceanCanvas() {
           oceanPositions[i3 + 1] = py;
           oceanPositions[i3 + 2] = pz;
 
-          // Gradual color lerping for deep ocean particles
-          let tR = 0.15, tG = 0.85, tB = 0.95;
-          if (activePalette === 'biolum') {
-            tR = 0.05; tG = 0.95; tB = 0.65;
-          } else if (activePalette === 'golden') {
-            tR = 0.98; tG = 0.65; tB = 0.15;
+          // Gradual color lerping for deep ocean / under the sea particles
+          let tR = 0.15,
+            tG = 0.85,
+            tB = 0.95;
+          if (activePalette === "mono") {
+            tR = 1.0;
+            tG = 1.0;
+            tB = 1.0;
+          } else if (activePalette === "biolum") {
+            // Undersea palette variation with faint breathing glow.
+            const paletteMixA = 0.5 + 0.5 * Math.sin(i * 0.41 + origY * 0.018);
+            const paletteMixB =
+              0.5 + 0.5 * Math.sin(i * 0.19 + origX * 0.012 + 1.7);
+            const depthRatio = Math.min(
+              1,
+              Math.max(0, (Math.abs(origY) - 25) / 320)
+            );
+
+            // Base undersea colors: aqua, kelp-green, deep-lagoon blue.
+            const aquaR = 0.04,
+              aquaG = 0.86,
+              aquaB = 0.95;
+            const kelpR = 0.02,
+              kelpG = 0.72,
+              kelpB = 0.46;
+            const lagoonR = 0.22,
+              lagoonG = 0.62,
+              lagoonB = 0.98;
+
+            let baseR = aquaR + (kelpR - aquaR) * paletteMixA;
+            let baseG = aquaG + (kelpG - aquaG) * paletteMixA;
+            let baseB = aquaB + (kelpB - aquaB) * paletteMixA;
+
+            const lagoonWeight = (0.15 + 0.55 * depthRatio) * paletteMixB;
+            baseR += (lagoonR - baseR) * lagoonWeight;
+            baseG += (lagoonG - baseG) * lagoonWeight;
+            baseB += (lagoonB - baseB) * lagoonWeight;
+
+            // Faint glow-dim cycle.
+            const faintPulse =
+              0.84 + 0.16 * Math.sin(elapsed * 1.7 + i * 0.27 + origZ * 0.01);
+
+            // Stronger brightness when cursor physically repels particles.
+            const displacement = Math.sqrt(
+              (px - origX) * (px - origX) +
+                (py - origY) * (py - origY) +
+                (pz - origZ) * (pz - origZ)
+            );
+            const cursorBoost = 1.0 + Math.min(1.9, displacement / 14) * 1.35;
+            const intensity = faintPulse * cursorBoost;
+
+            tR = Math.min(1.8, baseR * intensity);
+            tG = Math.min(1.8, baseG * intensity);
+            tB = Math.min(1.8, baseB * intensity);
+          } else if (activePalette === "golden") {
+            tR = 0.98;
+            tG = 0.65;
+            tB = 0.15;
           }
           oceanColors[i3] += (tR - oceanColors[i3]) * 0.08;
           oceanColors[i3 + 1] += (tG - oceanColors[i3 + 1]) * 0.08;
@@ -768,7 +969,14 @@ export default function SeashoreOceanCanvas() {
 
         oceanGeometry.attributes.position.needsUpdate = true;
         oceanGeometry.attributes.color.needsUpdate = true;
-        (oceanParticles.material as THREE.PointsMaterial).opacity = Math.min(0.95, 0.22 + scrollProgress * 0.75);
+        const oceanMaterial = oceanParticles.material as THREE.PointsMaterial;
+        const baseOpacity = Math.min(0.95, 0.22 + scrollProgress * 0.75);
+        if (activePalette === "biolum") {
+          const glowPulse = 0.9 + 0.1 * Math.sin(elapsed * 1.5);
+          oceanMaterial.opacity = Math.min(0.98, baseOpacity * glowPulse);
+        } else {
+          oceanMaterial.opacity = baseOpacity;
+        }
       }
 
       renderer.render(scene, camera);
@@ -778,11 +986,11 @@ export default function SeashoreOceanCanvas() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('click', handleClick);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("click", handleClick);
       if (renderer) {
         renderer.dispose();
       }
@@ -798,93 +1006,182 @@ export default function SeashoreOceanCanvas() {
       />
 
       {/* Sliding Indicator Theme Switcher (Top Left) */}
-      <div className="fixed top-20 left-6 z-40 flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg relative">
+      <div className="fixed top-20 left-6 z-40 inline-flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg max-w-[calc(100vw-3rem)]">
         {/* Animated Sliding Background Highlight Pill */}
         <div
           className="absolute top-1 bottom-1 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md"
           style={{
-            left: paletteMode === 'twilight' ? '4px' : paletteMode === 'biolum' ? '70px' : '136px',
-            width: paletteMode === 'twilight' ? '62px' : paletteMode === 'biolum' ? '62px' : '62px',
-            backgroundColor: paletteMode === 'twilight' ? '#38bdf8' : paletteMode === 'biolum' ? '#10b981' : '#f59e0b',
+            left:
+              paletteMode === "twilight"
+                ? "4px"
+                : paletteMode === "biolum"
+                ? "62px"
+                : paletteMode === "golden"
+                ? "120px"
+                : "178px",
+            width: "58px",
+            backgroundColor:
+              paletteMode === "twilight"
+                ? "#38bdf8"
+                : paletteMode === "biolum"
+                ? "#10b981"
+                : paletteMode === "golden"
+                ? "#f59e0b"
+                : "#ffffff",
           }}
         />
 
         <button
-          onClick={() => setPaletteRef.current && setPaletteRef.current('twilight')}
-          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === 'twilight' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
+          onClick={() =>
+            setPaletteRef.current && setPaletteRef.current("twilight")
+          }
+          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === "twilight"
+              ? "text-[#030712]"
+              : "text-slate-400 hover:text-white"
           }`}
         >
           Twilight
         </button>
         <button
-          onClick={() => setPaletteRef.current && setPaletteRef.current('biolum')}
-          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === 'biolum' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
+          onClick={() =>
+            setPaletteRef.current && setPaletteRef.current("biolum")
+          }
+          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === "biolum"
+              ? "text-[#030712]"
+              : "text-slate-400 hover:text-white"
           }`}
         >
           Biolum
         </button>
         <button
-          onClick={() => setPaletteRef.current && setPaletteRef.current('golden')}
-          className={`relative z-10 w-[62px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === 'golden' ? 'text-[#030712]' : 'text-slate-400 hover:text-white'
+          onClick={() =>
+            setPaletteRef.current && setPaletteRef.current("golden")
+          }
+          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === "golden"
+              ? "text-[#030712]"
+              : "text-slate-400 hover:text-white"
           }`}
         >
           Golden
+        </button>
+        <button
+          onClick={() => setPaletteRef.current && setPaletteRef.current("mono")}
+          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
+            paletteMode === "mono"
+              ? "text-[#030712]"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          Mono
         </button>
       </div>
 
       {/* Cellular Automata HUD Controls when active */}
       {automataActive && (
-        <div className="fixed top-20 right-6 z-40 p-4 rounded-2xl bg-[#081226]/95 border border-[var(--accent-primary)]/40 backdrop-blur-xl shadow-2xl text-xs font-mono text-slate-200 flex flex-col gap-2.5 transition-all duration-500">
-          <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
-            <div className="flex items-center gap-2 text-[var(--accent-primary)] font-bold">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-ping" />
-              <span>Conway&apos;s Game of Life</span>
+        <div
+          className={`hud-panel fixed top-20 right-6 z-40 bg-[#081226]/95 border border-[var(--accent-primary)]/40 backdrop-blur-xl shadow-2xl text-xs font-mono text-white/90 flex flex-col transition-[transform,width,height,padding,border-radius] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden ${
+            hudCollapsed
+              ? "w-7 h-10 p-0 rounded-l-xl rounded-r-none items-center justify-center"
+              : "p-4 gap-2.5 rounded-2xl"
+          }`}
+          style={{
+            transform: hudCollapsed
+              ? "translateX(calc(100% - 1.15rem))"
+              : "translateX(0)",
+          }}
+        >
+          <button
+            onClick={() => setHudCollapsed((prev) => !prev)}
+            className={`z-10 text-white/85 hover:text-white transition-all ${
+              hudCollapsed
+                ? "w-7 h-10 border-0 bg-transparent flex items-center justify-center"
+                : "absolute top-2 left-2 w-8 h-8 rounded-md bg-white/5 border border-white/15 hover:border-[var(--accent-primary)]"
+            }`}
+            aria-label={
+              hudCollapsed
+                ? "Expand Game of Life panel"
+                : "Collapse Game of Life panel"
+            }
+            title={hudCollapsed ? "Expand panel" : "Collapse panel"}
+          >
+            {hudCollapsed ? "‹" : "›"}
+          </button>
+
+          <div
+            className={`origin-top-right transition-[opacity,transform,max-height] duration-300 ease-out ${
+              hudCollapsed
+                ? "opacity-0 scale-95 max-h-0 pointer-events-none"
+                : "opacity-100 scale-100 max-h-[420px]"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2 pl-10">
+              <div className="flex items-center gap-2 text-[var(--accent-primary)] font-bold">
+                <span>Conway&apos;s Game of Life</span>
+              </div>
+              <span className="text-[10px] text-white/70 font-sans">
+                Active
+              </span>
             </div>
-            <span className="text-[10px] text-slate-400 font-sans">Active</span>
-          </div>
 
-          <div className="text-[11px] text-slate-400">
-            State: <strong className="text-white">Waves Calmed &amp; Snapped</strong>
-          </div>
+            <div className="text-[11px] text-white/75 mt-2">
+              Pattern:{" "}
+              <strong className="text-white">{currentPatternName}</strong> •
+              Calmed &amp; Snapped
+            </div>
 
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            <button
-              onClick={() => triggerPatternRef.current && triggerPatternRef.current('snap')}
-              className="px-2.5 py-1 rounded-md bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black text-[10px] font-bold transition-all"
-            >
-              Re-Snap
-            </button>
-            <button
-              onClick={() => triggerPatternRef.current && triggerPatternRef.current('gun')}
-              className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
-            >
-              Glider Gun
-            </button>
-            <button
-              onClick={() => triggerPatternRef.current && triggerPatternRef.current('pulsar')}
-              className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
-            >
-              Pulsar
-            </button>
-            <button
-              onClick={() => triggerPatternRef.current && triggerPatternRef.current('acorn')}
-              className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
-            >
-              Acorn
-            </button>
-            <button
-              onClick={() => triggerPatternRef.current && triggerPatternRef.current('clear')}
-              className="px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[10px] font-semibold transition-all"
-            >
-              Clear
-            </button>
-          </div>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <button
+                onClick={() =>
+                  triggerPatternRef.current && triggerPatternRef.current("snap")
+                }
+                className="px-2.5 py-1 rounded-md bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black text-[10px] font-bold transition-all"
+              >
+                Re-Snap
+              </button>
+              <button
+                onClick={() =>
+                  triggerPatternRef.current && triggerPatternRef.current("gun")
+                }
+                className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
+              >
+                Glider Gun
+              </button>
+              <button
+                onClick={() =>
+                  triggerPatternRef.current &&
+                  triggerPatternRef.current("pulsar")
+                }
+                className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
+              >
+                Pulsar
+              </button>
+              <button
+                onClick={() =>
+                  triggerPatternRef.current &&
+                  triggerPatternRef.current("acorn")
+                }
+                className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] text-[10px] font-semibold transition-all"
+              >
+                Acorn
+              </button>
+              <button
+                onClick={() =>
+                  triggerPatternRef.current &&
+                  triggerPatternRef.current("clear")
+                }
+                className="px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[10px] font-semibold transition-all"
+              >
+                Clear
+              </button>
+            </div>
 
-          <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-white/5">
-            Click 3x anywhere to toggle • Phased wave calming &amp; snap transition
+            <div className="text-[10px] text-white/55 font-sans pt-1 border-t border-white/5">
+              Click 3x anywhere to toggle • Phased wave calming &amp; snap
+              transition
+            </div>
           </div>
         </div>
       )}

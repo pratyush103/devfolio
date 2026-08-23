@@ -30,7 +30,7 @@ export default function ReadingProgress() {
       {/* Top Reading Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-[2.5px] z-50 bg-white/5">
         <div
-          className="h-full bg-gradient-to-r from-cyanAccent via-tealAccent to-deepViolet transition-all duration-100 ease-out shadow-[0_0_8px_rgba(56,189,248,0.8)]"
+          className="h-full bg-gradient-to-r from-[var(--accent-primary)] via-[var(--accent-secondary)] to-[var(--accent-violet)] transition-all duration-100 ease-out shadow-[0_0_8px_var(--accent-primary)]"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>

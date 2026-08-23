@@ -15,9 +15,11 @@
   --card-hover-border: rgba(56, 189, 248, 0.6);
   --badge-bg: rgba(56, 189, 248, 0.1);
   --text-highlight: #38bdf8;
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --caustic-color-1: rgba(56, 189, 248, 0.4);
+  --caustic-color-2: rgba(45, 212, 191, 0.15);
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 [data-theme="biolum"] {
@@ -32,6 +34,8 @@
   --card-hover-border: rgba(16, 185, 129, 0.65);
   --badge-bg: rgba(16, 185, 129, 0.12);
   --text-highlight: #10b981;
+  --caustic-color-1: rgba(16, 185, 129, 0.4);
+  --caustic-color-2: rgba(6, 182, 212, 0.15);
 }
 
 [data-theme="golden"] {
@@ -46,14 +50,44 @@
   --card-hover-border: rgba(245, 158, 11, 0.65);
   --badge-bg: rgba(245, 158, 11, 0.12);
   --text-highlight: #f59e0b;
+  --caustic-color-1: rgba(245, 158, 11, 0.35);
+  --caustic-color-2: rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="mono"] {
+  --accent-primary: #ffffff;
+  --accent-secondary: #ffffff;
+  --accent-sun: #ffffff;
+  --accent-sun-glow: #ffffff;
+  --accent-violet: #ffffff;
+  --bg-main: #000000;
+  --card-bg: rgba(0, 0, 0, 0.45);
+  --card-border: rgba(255, 255, 255, 0.25);
+  --card-hover-border: rgba(255, 255, 255, 0.9);
+  --badge-bg: rgba(255, 255, 255, 0.1);
+  --text-highlight: #ffffff;
+  --caustic-color-1: rgba(255, 255, 255, 0.25);
+  --caustic-color-2: rgba(255, 255, 255, 0.08);
 }
 
 /* Comprehensive Gradual Color Transition */
-html, body, div, section, header, footer, button, a, span, p, h1, h2, h3, h4 {
+html,
+body,
+div,
+section,
+header,
+footer,
+button,
+a,
+span,
+p,
+h1,
+h2,
+h3,
+h4 {
   transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.6s ease,
-              box-shadow 0.8s ease;
+    border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s ease,
+    box-shadow 0.8s ease;
 }
 
 html {
@@ -65,6 +99,10 @@ html {
 body {
   background-color: var(--bg-main);
   overflow-x: hidden;
+}
+
+main {
+  background-color: transparent !important;
 }
 
 /* Theme Utilities */
@@ -85,6 +123,211 @@ body {
 }
 .theme-bg-badge {
   background: var(--badge-bg);
+}
+
+/* MONO STYLE MODE NEGATIVE FILTER RULES */
+[data-theme="mono"] html,
+[data-theme="mono"] body {
+  background-color: #000000 !important;
+}
+
+[data-theme="mono"] h1,
+[data-theme="mono"] h2,
+[data-theme="mono"] h3,
+[data-theme="mono"] h4,
+[data-theme="mono"] p,
+[data-theme="mono"] .font-heading,
+[data-theme="mono"] .font-mono,
+[data-theme="mono"] nav a,
+[data-theme="mono"] section p,
+[data-theme="mono"] section h1,
+[data-theme="mono"] section h2,
+[data-theme="mono"] section h3,
+[data-theme="mono"] section span,
+[data-theme="mono"] .negative-filter-text {
+  color: #ffffff;
+  mix-blend-mode: difference;
+}
+
+[data-theme="mono"] .bg-slate-900\/60,
+[data-theme="mono"] .bg-slate-900\/70,
+[data-theme="mono"] .bg-slate-900\/80 {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="mono"] .border-cyanAccent\/20,
+[data-theme="mono"] .border-cyanAccent\/30,
+[data-theme="mono"] .border-cyanAccent\/40 {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="mono"] .border-cyanAccent {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+[data-theme="mono"] .text-tealAccent,
+[data-theme="mono"] .text-cyanAccent,
+[data-theme="mono"] .text-amber-300,
+[data-theme="mono"] .text-slate-300,
+[data-theme="mono"] .text-slate-400 {
+  color: #ffffff !important;
+}
+
+[data-theme="mono"] .bg-cyanAccent\/10,
+[data-theme="mono"] .bg-cyanAccent\/15,
+[data-theme="mono"] .bg-cyanAccent\/20,
+[data-theme="mono"] .bg-tealAccent\/10,
+[data-theme="mono"] .bg-tealAccent\/20 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="mono"] .bg-\[\#081226\]\/80,
+[data-theme="mono"] .bg-\[\#081226\]\/85,
+[data-theme="mono"] .bg-\[\#081226\]\/95,
+[data-theme="mono"] .bg-\[\#030712\]\/90 {
+  background-color: rgba(0, 0, 0, 0.88) !important;
+}
+
+[data-theme="mono"] .shadow-cyanAccent\/10,
+[data-theme="mono"] .shadow-cyanAccent\/20,
+[data-theme="mono"] .shadow-cyanAccent\/30 {
+  --tw-shadow-color: rgba(255, 255, 255, 0.22) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+[data-theme="mono"]
+  a.from-\[var\(--accent-primary\)\].to-\[var\(--accent-secondary\)\],
+[data-theme="mono"]
+  button.from-\[var\(--accent-primary\)\].to-\[var\(--accent-secondary\)\],
+[data-theme="mono"] a.bg-\[var\(--accent-primary\)\],
+[data-theme="mono"] button.bg-\[var\(--accent-primary\)\],
+[data-theme="mono"] a.text-\[\#030712\],
+[data-theme="mono"] button.text-\[\#030712\],
+[data-theme="mono"] a.text-primary,
+[data-theme="mono"] button.text-primary {
+  color: #030712 !important;
+  mix-blend-mode: normal !important;
+}
+
+[data-theme="mono"] .hover\:border-cyanAccent:hover {
+  border-color: rgba(255, 255, 255, 0.72) !important;
+}
+
+[data-theme="mono"] .hover\:bg-cyanAccent\/20:hover,
+[data-theme="mono"] .hover\:bg-\[var\(--accent-primary\)\]:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-theme="mono"] .hud-panel,
+[data-theme="mono"] .hud-panel * {
+  mix-blend-mode: normal !important;
+}
+
+/* GOLDEN MODE OVERRIDES FOR HARDCODED CYAN/SLATE UTILITIES */
+[data-theme="golden"] .bg-slate-900\/60,
+[data-theme="golden"] .bg-slate-900\/70,
+[data-theme="golden"] .bg-slate-900\/80 {
+  background-color: rgba(35, 22, 5, 0.72) !important;
+  border-color: rgba(245, 158, 11, 0.28) !important;
+}
+
+[data-theme="golden"] .bg-\[\#081226\]\/80,
+[data-theme="golden"] .bg-\[\#081226\]\/85,
+[data-theme="golden"] .bg-\[\#081226\]\/95,
+[data-theme="golden"] .bg-\[\#030712\]\/90 {
+  background-color: rgba(24, 14, 3, 0.9) !important;
+}
+
+[data-theme="golden"] .border-cyanAccent,
+[data-theme="golden"] .border-cyanAccent\/20,
+[data-theme="golden"] .border-cyanAccent\/30,
+[data-theme="golden"] .border-cyanAccent\/40 {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+[data-theme="golden"] .text-cyanAccent,
+[data-theme="golden"] .text-tealAccent {
+  color: #fbbf24 !important;
+}
+
+[data-theme="golden"] .bg-cyanAccent\/10,
+[data-theme="golden"] .bg-cyanAccent\/15,
+[data-theme="golden"] .bg-cyanAccent\/20,
+[data-theme="golden"] .bg-tealAccent\/10,
+[data-theme="golden"] .bg-tealAccent\/20 {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.42) !important;
+}
+
+[data-theme="golden"] .shadow-cyanAccent\/10,
+[data-theme="golden"] .shadow-cyanAccent\/20,
+[data-theme="golden"] .shadow-cyanAccent\/30 {
+  --tw-shadow-color: rgba(245, 158, 11, 0.25) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+[data-theme="golden"] .hover\:border-cyanAccent:hover {
+  border-color: rgba(251, 191, 36, 0.72) !important;
+}
+
+[data-theme="golden"] .hover\:bg-cyanAccent\/20:hover,
+[data-theme="golden"] .hover\:bg-cyanAccent\/10:hover {
+  background-color: rgba(251, 191, 36, 0.2) !important;
+}
+
+/* BIOLUM MODE OVERRIDES FOR HARDCODED CYAN/SLATE UTILITIES */
+[data-theme="biolum"] .bg-slate-900\/60,
+[data-theme="biolum"] .bg-slate-900\/70,
+[data-theme="biolum"] .bg-slate-900\/80 {
+  background-color: rgba(6, 30, 26, 0.74) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="biolum"] .bg-\[\#081226\]\/80,
+[data-theme="biolum"] .bg-\[\#081226\]\/85,
+[data-theme="biolum"] .bg-\[\#081226\]\/95,
+[data-theme="biolum"] .bg-\[\#030712\]\/90 {
+  background-color: rgba(3, 20, 18, 0.9) !important;
+}
+
+[data-theme="biolum"] .border-cyanAccent,
+[data-theme="biolum"] .border-cyanAccent\/20,
+[data-theme="biolum"] .border-cyanAccent\/30,
+[data-theme="biolum"] .border-cyanAccent\/40 {
+  border-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+[data-theme="biolum"] .text-cyanAccent,
+[data-theme="biolum"] .text-tealAccent {
+  color: #10b981 !important;
+}
+
+[data-theme="biolum"] .bg-cyanAccent\/10,
+[data-theme="biolum"] .bg-cyanAccent\/15,
+[data-theme="biolum"] .bg-cyanAccent\/20,
+[data-theme="biolum"] .bg-tealAccent\/10,
+[data-theme="biolum"] .bg-tealAccent\/20 {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+[data-theme="biolum"] .shadow-cyanAccent\/10,
+[data-theme="biolum"] .shadow-cyanAccent\/20,
+[data-theme="biolum"] .shadow-cyanAccent\/30 {
+  --tw-shadow-color: rgba(16, 185, 129, 0.24) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+[data-theme="biolum"] .hover\:border-cyanAccent:hover {
+  border-color: rgba(6, 182, 212, 0.7) !important;
+}
+
+[data-theme="biolum"] .hover\:bg-cyanAccent\/20:hover,
+[data-theme="biolum"] .hover\:bg-cyanAccent\/10:hover {
+  background-color: rgba(16, 185, 129, 0.2) !important;
 }
 
 /* Custom Scrollbar */
