@@ -105,6 +105,18 @@ main {
   background-color: transparent !important;
 }
 
+/* Fix gradient text fading in WebKit / production CSS minifiers */
+.bg-clip-text,
+[class*="bg-clip-text"] {
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.8s ease !important;
+}
+
 /* Theme Utilities */
 .theme-text-primary {
   color: var(--accent-primary);

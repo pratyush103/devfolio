@@ -22,7 +22,7 @@ export default function Hero({ onOpenContact }: { onOpenContact?: () => void }) 
 
         <h1 className="font-heading text-5xl sm:text-7xl md:text-8xl font-extrabold text-white leading-[1.04] tracking-tight mb-6">
           Hi, I am{' '}
-          <span className="block bg-gradient-to-r from-white via-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+          <span className="block bg-gradient-to-r from-white via-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
             {profileData.name}
           </span>
         </h1>
