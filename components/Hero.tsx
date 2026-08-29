@@ -28,7 +28,7 @@ export default function Hero({ onOpenContact }: { onOpenContact?: () => void }) 
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-300 leading-relaxed mb-10 max-w-2xl font-sans">
-          Building cool <strong className="text-white font-semibold">multi-agent systems</strong> with LangGraph, tinkering with <strong className="text-white font-semibold">.NET trading engines</strong>, and working on supply chain forecasting during my time at Dow.
+          Building what intrigues me, breaking them, learning from them, and building them again, just better.
         </p>
 
         <div className="flex flex-wrap items-center gap-4">
