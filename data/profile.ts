@@ -4,8 +4,8 @@ export const profileData = {
   name: "Pratyush Landekar",
   email: "pratyushlandekar103@gmail.com",
   location: "Mumbai, India",
-  tagline: "AI Systems Engineer • MBA Tech (IT & Finance)",
-  summary: "Dual-degree engineer at MPSTME, NMIMS Mumbai. Specializing in stateful multi-agent consensus graphs with LangGraph, asynchronous FastAPI backends, and enterprise supply chain forecasting models.",
+  tagline: "MBA Tech (IT & Finance)",
+  summary: "Dual-degree engineering student at MPSTME, NMIMS Mumbai. I love building things with LangGraph, FastAPI, and working on supply chain data models.",
   github: "https://github.com/pratyush103",
   linkedin: "https://www.linkedin.com/in/pratyush-landekar103",
   cgpa: "3.51 / 4.00",
@@ -22,9 +22,9 @@ export const experiencesData: ExperienceItem[] = [
     metrics: "ABC/XYZ Variance Segmentation",
     tools: ["Power Automate", "Power Apps", "SAP HANA", "Python", "VBA"],
     points: [
-      "Engineered automated exception workflows using Power Automate and custom NLP parsers to convert unstructured logistics emails into verified SAP payloads.",
-      "Modeled multi-lag forecast variances across regional hubs, designing dynamic exception thresholds via ABC/XYZ inventory segmentation to optimize hub stock levels.",
-      "Constructed financial tracking models isolating carrier detention bottlenecks, separating legally recoverable penalties from strategic operational absorption."
+      "Built automated workflows using Power Automate and custom NLP parsers to help process unstructured logistics emails into SAP.",
+      "Worked on forecast variance modeling across regional hubs, using inventory segmentation to help optimize stock levels.",
+      "Constructed tracking models to identify supply chain bottlenecks, helping the team separate recoverable costs from general operational expenses."
     ]
   },
   {
@@ -35,8 +35,8 @@ export const experiencesData: ExperienceItem[] = [
     metrics: "₹1 Cr Project Pitch & Demonstration",
     tools: ["LangChain", "FastAPI", "React", "Python", "RAG"],
     points: [
-      "Engineered automated curriculum generation and MCQ evaluation engines for EasyLearn V3 and Notes Buddy using LangChain RAG pipelines.",
-      "Delivered live technical demonstration at a Pune nursing institute, showcasing automated Marathi medical content authoring and proctoring to advance a ₹1 Cr institutional deployment."
+      "Developed automated curriculum and quiz generation features for EasyLearn V3 and Notes Buddy using LangChain RAG pipelines.",
+      "Gave a live technical demo at a Pune nursing institute, showing off our automated Marathi medical content generation."
     ]
   },
   {
@@ -57,13 +57,13 @@ export const projectsData: ProjectItem[] = [
   {
     id: "finsight",
     title: "FinSight",
-    description: "Hierarchical multi-agent research platform coordinating specialized LLM nodes to parse statutory filings under Indian Accounting Standards (Ind AS) with audit-ready citations.",
+    description: "Multi-agent research platform using LLMs to parse and organize statutory filings with accurate citations.",
     category: "ai",
     tags: ["LangGraph", "FastAPI", "Next.js", "LangSmith", "Python"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "PieChart",
-    metrics: "LangGraph StateGraph Engine",
-    longDescription: "FinSight executes cyclical state machines with LangGraph where an orchestrator agent delegates statutory note verification, cash-flow reconciliation, and anomaly audits to domain-specific agent nodes.",
+    metrics: "LangGraph Powered",
+    longDescription: "FinSight uses LangGraph to coordinate different AI agents, delegating tasks like note verification and cash-flow checks to specialized agent nodes.",
     architectureHighlights: [
       "Hierarchical state graphs with LangGraph managing inter-agent consensus and verification loops.",
       "Strict citation-grounded RAG over statutory Ind AS accounting disclosures.",
@@ -97,13 +97,13 @@ export const projectsData: ProjectItem[] = [
   {
     id: "insight-forge",
     title: "Insight Forge",
-    description: "Autonomous dataset intelligence pipeline that profiles tabular schemas, identifies statistical skewness, and compiles interactive visualization code without manual configuration.",
+    description: "An intelligent pipeline that automatically profiles tabular data and generates interactive visualizations, saving you from manual setup.",
     category: "ai",
     tags: ["LangGraph", "Streamlit", "Ollama", "Python"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "Sparkles",
-    metrics: "Autonomous Schema Profiler",
-    longDescription: "Insight Forge ingests raw CSV/Parquet uploads, runs statistical distribution analysis, and writes verified Plotly/Streamlit dashboard code through local Ollama LLM execution.",
+    metrics: "Automated Data Profiling",
+    longDescription: "Insight Forge takes raw CSV/Parquet uploads, runs some statistical analysis, and generates helpful Plotly/Streamlit dashboards using local Ollama LLMs.",
     architectureHighlights: [
       "Autonomous data profiling agent detecting missing value correlations and outliers.",
       "Code generation agent writing executable Plotly data visualizations.",
@@ -117,13 +117,13 @@ export const projectsData: ProjectItem[] = [
   {
     id: "supply-chain-analytics",
     title: "Enterprise Demand Forecasting",
-    description: "Multi-lag forecast variance analyzer using ABC/XYZ inventory segmentation and automated exception routing designed for large-scale enterprise logistics.",
+    description: "Forecast variance analyzer using inventory segmentation and automated exception routing for enterprise logistics.",
     category: "analytics",
     tags: ["Power Automate", "SAP HANA", "Python", "Excel/VBA"],
     githubUrl: "https://github.com/pratyush103",
     iconName: "BarChart3",
-    metrics: "ABC/XYZ Variance Segmentation",
-    longDescription: "Engineered at Fortune 100 enterprise scale (Dow) to analyze multi-lag forecast accuracy across regional distribution hubs, automating carrier detention penalty quantification.",
+    metrics: "Supply Chain Analytics",
+    longDescription: "Built during my internship at Dow to analyze forecast accuracy across regional hubs and automate carrier penalty tracking.",
     architectureHighlights: [
       "ABC/XYZ segmentation algorithms classifying inventory positioning priorities.",
       "Power Automate cloud flows integrating SAP HANA enterprise data layers.",

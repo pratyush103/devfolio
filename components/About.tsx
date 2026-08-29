@@ -8,7 +8,7 @@ export default function About() {
       <div className="mb-12">
         <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 01. Domain Architecture</span>
         <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-          Multi-Agent Consensus &amp; Enterprise Telemetry
+          Building with AI &amp; Data
         </h2>
         <p className="text-slate-400 text-base sm:text-lg mt-3 max-w-2xl">
           {profileData.summary}
@@ -107,9 +107,9 @@ export default function About() {
         </div>
 
         <div className="p-3 rounded-lg bg-white/5 border border-white/5 font-mono">
-          <div className="text-[10px] text-slate-400 uppercase mb-1">Domain Scale</div>
-          <div className="text-white font-bold text-xs">Fortune 100 Logistics</div>
-          <div className="text-[10px] text-tealAccent mt-0.5">Dow Chemicals</div>
+          <div className="text-[10px] text-slate-400 uppercase mb-1">Enterprise Exp</div>
+          <div className="text-white font-bold text-xs">Global Logistics</div>
+          <div className="text-[10px] text-tealAccent mt-0.5">Dow Chemicals Intern</div>
         </div>
       </div>
     </section>

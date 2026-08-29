@@ -38,6 +38,75 @@ export default function SeashoreOceanCanvas() {
     let sunMesh: THREE.Mesh;
     let sunGlowMesh: THREE.Mesh;
 
+    // ─── BLACK HOLE STATE MACHINE ───
+    let blackHoleMesh: THREE.Mesh;
+    let bhRenderTarget: THREE.WebGLRenderTarget;
+    let bhLensingMaterial: THREE.ShaderMaterial;
+    let bhLensingScene: THREE.Scene;
+    let bhLensingCamera: THREE.OrthographicCamera;
+    const bhRaycaster = new THREE.Raycaster();
+    const bhMouseNDC = new THREE.Vector2();
+
+    let bhState: 'sun' | 'collapsing' | 'blackhole' | 'reverting' = 'sun';
+    let bhCollapseStartTime = 0;
+    let bhRevertStartTime = 0;
+    let bhHoldStartTime = 0;
+    let bhIsHolding = false;
+    let bhIsDragging = false;
+    let bhDragOffsetX = 0;
+    let bhDragOffsetY = 0;
+    let bhCoronaScale = 1.0;
+    let bhSunScale = 1.0;
+    let bhHorizonScale = 0.0;
+    let bhLensStrength = 0.0;
+    const bhOriginalPos = new THREE.Vector3(38, 24, -280);
+    const bhWorldPos = new THREE.Vector3(38, 24, -280);
+    // Snapshot of collapse progress when user releases, used for smooth revert
+    let bhRevertFromCoronaScale = 1.0;
+    let bhRevertFromSunScale = 1.0;
+
+    const isMobileView = () => window.innerWidth < 768 || ('ontouchstart' in window);
+    const getLensMax = () => isMobileView() ? 0.008 : 0.02;
+
+    const BH_LENSING_FRAG = `
+      varying vec2 vUv;
+      uniform sampler2D tScene;
+      uniform vec2 uResolution;
+      uniform vec2 uBlackHolePos;
+      uniform float uBlackHoleRadius;
+      uniform float uLensStrength;
+      uniform float uActive;
+
+      void main() {
+        vec2 uv = vUv;
+        vec2 diff = uv - uBlackHolePos;
+        float aspect = uResolution.x / uResolution.y;
+        diff.x *= aspect;
+        float dist = length(diff);
+        vec2 dir = (dist > 0.0001) ? normalize(diff) : vec2(0.0);
+
+        float distortion = uLensStrength / (dist * dist + 0.0005);
+        distortion *= uActive;
+        distortion = min(distortion, 0.35);
+
+        // Subtract to magnify (push background outwards) instead of pulling inwards
+        vec2 distortedUV = uv - dir * distortion * vec2(1.0 / aspect, 1.0);
+
+        vec4 color = texture2D(tScene, distortedUV);
+        
+        // Prevent edge clamping artifacts by hiding out-of-bounds samples
+        if (distortedUV.x < 0.0 || distortedUV.x > 1.0 || distortedUV.y < 0.0 || distortedUV.y > 1.0) {
+            color = vec4(0.0);
+        }
+
+        float corrDist = dist / aspect;
+        float horizonMask = smoothstep(uBlackHoleRadius - 0.004, uBlackHoleRadius, corrDist);
+
+        gl_FragColor = vec4(color.rgb * horizonMask, 1.0);
+      }
+    `;
+
+
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -366,11 +435,52 @@ export default function SeashoreOceanCanvas() {
       createDeepOceanParticles();
       applyTheme("twilight");
 
+      // ─── BLACK HOLE POST-PROCESSING ───
+      bhRenderTarget = new THREE.WebGLRenderTarget(width, height, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+      });
+
+      bhLensingMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          tScene: { value: bhRenderTarget.texture },
+          uResolution: { value: new THREE.Vector2(width, height) },
+          uBlackHolePos: { value: new THREE.Vector2(0.5, 0.5) },
+          uBlackHoleRadius: { value: 0.05 },
+          uLensStrength: { value: 0.0 },
+          uActive: { value: 0.0 },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: BH_LENSING_FRAG,
+        depthTest: false,
+        depthWrite: false,
+      });
+
+      bhLensingScene = new THREE.Scene();
+      bhLensingCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      bhLensingScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bhLensingMaterial));
+
+      const bhGeo = new THREE.CircleGeometry(36, 64);
+      const bhMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+      blackHoleMesh = new THREE.Mesh(bhGeo, bhMat);
+      blackHoleMesh.visible = false;
+      blackHoleMesh.position.copy(bhOriginalPos);
+      scene.add(blackHoleMesh);
+
       window.addEventListener("resize", handleResize);
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("touchmove", handleTouchMove, { passive: true });
       window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("click", handleClick);
+      window.addEventListener("pointerdown", handleBHPointerDown);
+      window.addEventListener("pointerup", handleBHPointerUp);
+      window.addEventListener("pointermove", handleBHPointerMove);
 
       handleScroll();
       animate();
@@ -565,6 +675,276 @@ export default function SeashoreOceanCanvas() {
       scene.add(oceanParticles);
     }
 
+    // ─── BLACK HOLE INTERACTION ───
+    function bhIsSunHit(cx: number, cy: number): boolean {
+      if (!sunMesh || bhState !== 'sun') return false;
+      bhMouseNDC.x = (cx / width) * 2 - 1;
+      bhMouseNDC.y = -(cy / height) * 2 + 1;
+      bhRaycaster.setFromCamera(bhMouseNDC, camera);
+      return bhRaycaster.intersectObject(sunMesh, false).length > 0;
+    }
+
+    function bhIsNearHole(cx: number, cy: number): boolean {
+      const s = bhWorldPos.clone().project(camera);
+      const sx = (s.x + 1) / 2 * width;
+      const sy = (-s.y + 1) / 2 * height;
+      return Math.hypot(cx - sx, cy - sy) < 100;
+    }
+
+    function bhScreenToWorld(cx: number, cy: number): THREE.Vector3 {
+      const nx = (cx / width) * 2 - 1;
+      const ny = -(cy / height) * 2 + 1;
+      const nearPt = new THREE.Vector3(nx, ny, 0).unproject(camera);
+      const farPt = new THREE.Vector3(nx, ny, 1).unproject(camera);
+      const dir = new THREE.Vector3().subVectors(farPt, nearPt).normalize();
+      const t = (bhOriginalPos.z - nearPt.z) / dir.z;
+      return new THREE.Vector3().copy(nearPt).addScaledVector(dir, t);
+    }
+
+    function bhEaseOutBack(t: number): number {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    }
+
+    function bhClampToViewport() {
+      const s = bhWorldPos.clone().project(camera);
+      const m = 0.08;
+      const cx = Math.max(-1 + m, Math.min(1 - m, s.x));
+      const cy = Math.max(-1 + m, Math.min(1 - m, s.y));
+      if (Math.abs(s.x - cx) > 0.001 || Math.abs(s.y - cy) > 0.001) {
+        bhWorldPos.copy(bhScreenToWorld((cx + 1) / 2 * width, (-cy + 1) / 2 * height));
+      }
+    }
+
+    function handleBHPointerDown(e: PointerEvent) {
+      if (bhState === 'sun' && bhIsSunHit(e.clientX, e.clientY)) {
+        bhIsHolding = true;
+        bhHoldStartTime = performance.now();
+      } else if (bhState === 'blackhole' && bhIsNearHole(e.clientX, e.clientY)) {
+        bhIsDragging = true;
+        const s = bhWorldPos.clone().project(camera);
+        bhDragOffsetX = e.clientX - (s.x + 1) / 2 * width;
+        bhDragOffsetY = e.clientY - (-s.y + 1) / 2 * height;
+      }
+    }
+
+    function handleBHPointerUp() {
+      if (bhIsHolding && bhState === 'collapsing') {
+        // User released during collapse — revert back to sun
+        bhRevertFromCoronaScale = bhCoronaScale;
+        bhRevertFromSunScale = bhSunScale;
+        bhState = 'reverting';
+        bhRevertStartTime = performance.now();
+      }
+      bhIsHolding = false;
+      bhIsDragging = false;
+    }
+
+    function handleBHPointerMove(e: PointerEvent) {
+      if (bhIsDragging && bhState === 'blackhole') {
+        const tx = e.clientX - bhDragOffsetX;
+        const ty = e.clientY - bhDragOffsetY;
+        bhWorldPos.copy(bhScreenToWorld(tx, ty));
+        bhClampToViewport();
+      }
+    }
+
+    function bhApplyVisuals() {
+      if (!sunMesh) return;
+
+      let sunOpacity = 1.0;
+      let coronaOpacityMult = 1.0;
+      let glowOpacityMult = 1.0;
+
+      if (bhState === 'collapsing') {
+        // Boost opacity and glow intensity as energy compresses during collapse
+        sunOpacity = 1.0;
+        coronaOpacityMult = 2.2;
+        glowOpacityMult = 2.5;
+      } else if (bhState === 'reverting') {
+        sunOpacity = Math.min(1.0, bhSunScale * 0.96);
+      }
+
+      (sunMesh.material as THREE.MeshBasicMaterial).opacity = sunOpacity;
+
+      if (sunMesh.children[0]) {
+        (sunMesh.children[0] as THREE.Mesh).scale.setScalar(Math.max(0.001, bhCoronaScale));
+        ((sunMesh.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = Math.min(1.0, bhCoronaScale * 0.35 * coronaOpacityMult);
+      }
+      if (sunGlowMesh) {
+        sunGlowMesh.scale.setScalar(Math.max(0.001, bhCoronaScale));
+        (sunGlowMesh.material as THREE.MeshBasicMaterial).opacity = Math.min(1.0, bhCoronaScale * 0.14 * glowOpacityMult);
+      }
+      sunMesh.scale.setScalar(Math.max(0.001, bhSunScale));
+      // Keep sun mesh position synced with bhWorldPos during all non-sun states
+      if (bhState !== 'sun') {
+        sunMesh.position.copy(bhWorldPos);
+      }
+      // Only show black hole disk when fully in blackhole state
+      blackHoleMesh.visible = bhState === 'blackhole' && bhHorizonScale > 0.01;
+      if (blackHoleMesh.visible) {
+        blackHoleMesh.scale.setScalar(bhHorizonScale);
+        blackHoleMesh.position.copy(bhWorldPos);
+      }
+    }
+
+    function bhUpdate() {
+      if (bhIsHolding && bhState === 'sun') {
+        if (performance.now() - bhHoldStartTime > 200) {
+          bhState = 'collapsing';
+          bhCollapseStartTime = performance.now();
+          // Keep bhIsHolding = true so we can detect release during collapse
+        }
+      }
+
+      if (bhState === 'collapsing') {
+        // If user released the pointer, the handleBHPointerUp already switched
+        // to 'reverting', so this block only runs while still holding.
+        const t = (performance.now() - bhCollapseStartTime) / 1000;
+        if (t < 1.5) {
+          // Phase 1: Corona collapses slowly with turbulence
+          const progress = t / 1.5;
+          const turbulence = (Math.sin(t * 40) + Math.cos(t * 27)) * 0.08 * progress;
+          bhCoronaScale = Math.max(0, 1.0 - progress + turbulence);
+          bhSunScale = 1.0 + (Math.sin(t * 30) * 0.04 * progress); // Slight tremble
+          bhHorizonScale = 0;
+          bhLensStrength = 0;
+        } else if (t < 3.0) {
+          // Phase 2: Sun collapses more violently
+          const progress = (t - 1.5) / 1.5;
+          const turbulence = (Math.sin(t * 50) + Math.cos(t * 37)) * 0.1 * (1.0 - progress);
+          bhCoronaScale = 0;
+          bhSunScale = Math.max(0, 1.0 - progress + turbulence);
+          bhHorizonScale = 0;
+          bhLensStrength = 0;
+        } else if (t < 3.5) {
+          // Phase 3: Black hole emerges
+          bhCoronaScale = 0;
+          bhSunScale = 0;
+          const p = Math.min(1, (t - 3.0) / 0.5);
+          bhHorizonScale = bhEaseOutBack(p);
+          bhLensStrength = p * getLensMax();
+        } else {
+          bhState = 'blackhole';
+          bhIsHolding = false;
+          bhCoronaScale = 0;
+          bhSunScale = 0;
+          bhHorizonScale = 1.0;
+          bhLensStrength = getLensMax();
+          if (containerRef.current) {
+            containerRef.current.style.zIndex = '50';
+            containerRef.current.style.pointerEvents = 'auto';
+          }
+        }
+        bhApplyVisuals();
+      }
+
+      if (bhState === 'blackhole') {
+        bhApplyVisuals();
+      }
+
+      if (bhState === 'reverting') {
+        const t = (performance.now() - bhRevertStartTime) / 1000;
+        // Determine if we're reverting from a full black hole (has horizon) or mid-collapse
+        const wasBlackHole = bhRevertFromSunScale <= 0.01 && bhRevertFromCoronaScale <= 0.01;
+
+        if (wasBlackHole) {
+          // Reverting from full black hole state — collapse horizon, move back, expand sun
+          if (t < 0.4) {
+            bhHorizonScale = Math.max(0, 1.0 - t / 0.4);
+            bhLensStrength = getLensMax() * (1.0 - t / 0.4);
+            bhSunScale = 0;
+            bhCoronaScale = 0;
+          } else if (t < 0.8) {
+            bhHorizonScale = 0;
+            bhLensStrength = 0;
+            bhSunScale = 0;
+            bhCoronaScale = 0;
+            const moveT = (t - 0.4) / 0.4;
+            bhWorldPos.lerp(bhOriginalPos, moveT * 0.2);
+          } else if (t < 1.3) {
+            const expandT = (t - 0.8) / 0.5;
+            bhSunScale = Math.min(1.0, expandT);
+            bhCoronaScale = Math.min(1.0, expandT);
+            bhHorizonScale = 0;
+            bhLensStrength = 0;
+            bhWorldPos.copy(bhOriginalPos);
+          } else {
+            bhState = 'sun';
+            bhSunScale = 1.0;
+            bhCoronaScale = 1.0;
+            bhHorizonScale = 0;
+            bhLensStrength = 0;
+            bhWorldPos.copy(bhOriginalPos);
+            blackHoleMesh.visible = false;
+            sunMesh.scale.setScalar(1.0);
+            sunMesh.position.set(38, 24, -280);
+            if (sunMesh.children[0]) (sunMesh.children[0] as THREE.Mesh).scale.setScalar(1.0);
+            if (sunGlowMesh) sunGlowMesh.scale.setScalar(1.0);
+            if (containerRef.current) {
+              containerRef.current.style.zIndex = '0';
+              containerRef.current.style.pointerEvents = 'none';
+            }
+          }
+        } else {
+          // Reverting from mid-collapse — smoothly restore sun/corona from wherever they were
+          const revertDuration = 0.5;
+          if (t < revertDuration) {
+            const p = t / revertDuration;
+            // Ease out quad
+            const ease = 1 - (1 - p) * (1 - p);
+            bhSunScale = bhRevertFromSunScale + (1.0 - bhRevertFromSunScale) * ease;
+            bhCoronaScale = bhRevertFromCoronaScale + (1.0 - bhRevertFromCoronaScale) * ease;
+            bhHorizonScale = 0;
+            bhLensStrength = 0;
+          } else {
+            bhState = 'sun';
+            bhSunScale = 1.0;
+            bhCoronaScale = 1.0;
+            bhHorizonScale = 0;
+            bhLensStrength = 0;
+            bhWorldPos.copy(bhOriginalPos);
+            blackHoleMesh.visible = false;
+            sunMesh.scale.setScalar(1.0);
+            sunMesh.position.set(38, 24, -280);
+            if (sunMesh.children[0]) (sunMesh.children[0] as THREE.Mesh).scale.setScalar(1.0);
+            if (sunGlowMesh) sunGlowMesh.scale.setScalar(1.0);
+            if (containerRef.current) {
+              containerRef.current.style.zIndex = '0';
+              containerRef.current.style.pointerEvents = 'none';
+            }
+          }
+        }
+        bhApplyVisuals();
+      }
+
+      if (bhLensingMaterial) {
+        if (bhLensStrength > 0.0001 && (bhState === 'blackhole' || (bhState === 'collapsing' && bhSunScale <= 0.01) || (bhState === 'reverting' && bhHorizonScale > 0.01))) {
+          const s = bhWorldPos.clone().project(camera);
+          bhLensingMaterial.uniforms.uBlackHolePos.value.set((s.x + 1) / 2, (s.y + 1) / 2);
+          bhLensingMaterial.uniforms.uLensStrength.value = bhLensStrength;
+          bhLensingMaterial.uniforms.uActive.value = Math.min(1.0, bhLensStrength / (getLensMax() * 0.5));
+          bhLensingMaterial.uniforms.uBlackHoleRadius.value = bhHorizonScale * 0.045;
+        } else {
+          // Ensure lensing is completely disabled when not needed
+          bhLensingMaterial.uniforms.uLensStrength.value = 0;
+          bhLensingMaterial.uniforms.uActive.value = 0;
+        }
+      }
+    }
+
+    function bhRender() {
+      if (bhLensStrength > 0.0001 && bhRenderTarget && bhLensingMaterial) {
+        renderer.setRenderTarget(bhRenderTarget);
+        renderer.render(scene, camera);
+        renderer.setRenderTarget(null);
+        renderer.render(bhLensingScene, bhLensingCamera);
+      } else {
+        renderer.render(scene, camera);
+      }
+    }
+
     function handleClick(e: MouseEvent) {
       const now = performance.now() / 1000;
       if (now - lastClickTime < 0.85) {
@@ -574,9 +954,17 @@ export default function SeashoreOceanCanvas() {
       }
       lastClickTime = now;
 
-      // 3 clicks detected: Initiate the Calming -> Flattening -> Game of Life Sequence
+      // 3 clicks detected
       if (clickCount >= 3) {
         clickCount = 0;
+        if (bhState === 'blackhole') {
+          // Snapshot current state for revert animation
+          bhRevertFromCoronaScale = bhCoronaScale;
+          bhRevertFromSunScale = bhSunScale;
+          bhState = 'reverting';
+          bhRevertStartTime = performance.now();
+          return;
+        }
         isLifeMode = !isLifeMode;
         setAutomataActive(isLifeMode);
         if (isLifeMode) {
@@ -672,6 +1060,8 @@ export default function SeashoreOceanCanvas() {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      if (bhRenderTarget) bhRenderTarget.setSize(width, height);
+      if (bhLensingMaterial) bhLensingMaterial.uniforms.uResolution.value.set(width, height);
     }
 
     const clock = new THREE.Clock();
@@ -681,22 +1071,24 @@ export default function SeashoreOceanCanvas() {
       const elapsed = clock.getElapsedTime();
 
       // Gradual Sun & Corona Color Lerping in Three.js
-      currentSunColor.lerp(targetSunColor, 0.06);
-      currentCoronaColor.lerp(targetCoronaColor, 0.06);
-      if (sunMesh) {
-        (sunMesh.material as THREE.MeshBasicMaterial).color.copy(
-          currentSunColor
-        );
-        if (sunMesh.children.length > 0) {
-          (
-            (sunMesh.children[0] as THREE.Mesh)
-              .material as THREE.MeshBasicMaterial
-          ).color.copy(currentCoronaColor);
-        }
-        if (sunGlowMesh) {
-          (sunGlowMesh.material as THREE.MeshBasicMaterial).color.copy(
-            currentCoronaColor
+      if (bhState === 'sun') {
+        currentSunColor.lerp(targetSunColor, 0.06);
+        currentCoronaColor.lerp(targetCoronaColor, 0.06);
+        if (sunMesh) {
+          (sunMesh.material as THREE.MeshBasicMaterial).color.copy(
+            currentSunColor
           );
+          if (sunMesh.children.length > 0) {
+            (
+              (sunMesh.children[0] as THREE.Mesh)
+                .material as THREE.MeshBasicMaterial
+            ).color.copy(currentCoronaColor);
+          }
+          if (sunGlowMesh) {
+            (sunGlowMesh.material as THREE.MeshBasicMaterial).color.copy(
+              currentCoronaColor
+            );
+          }
         }
       }
 
@@ -732,7 +1124,7 @@ export default function SeashoreOceanCanvas() {
       camera.position.z += (targetCamZ - camera.position.z) * 0.06;
       camera.lookAt(0, targetLookY, 0);
 
-      if (sunMesh) {
+      if (sunMesh && bhState === 'sun') {
         sunMesh.position.y = 24 + scrollProgress * 92;
         const sunOpacity = Math.max(0, 0.95 - scrollProgress * 1.5);
         (sunMesh.material as THREE.MeshBasicMaterial).opacity = sunOpacity;
@@ -979,7 +1371,8 @@ export default function SeashoreOceanCanvas() {
         }
       }
 
-      renderer.render(scene, camera);
+      bhUpdate();
+      bhRender();
     }
 
     init();
@@ -991,6 +1384,11 @@ export default function SeashoreOceanCanvas() {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("click", handleClick);
+      window.removeEventListener("pointerdown", handleBHPointerDown);
+      window.removeEventListener("pointerup", handleBHPointerUp);
+      window.removeEventListener("pointermove", handleBHPointerMove);
+      if (bhRenderTarget) bhRenderTarget.dispose();
+      if (bhLensingMaterial) bhLensingMaterial.dispose();
       if (renderer) {
         renderer.dispose();
       }

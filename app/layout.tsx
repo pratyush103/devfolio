@@ -18,7 +18,7 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pratyush Landekar | AI Systems Engineer & Quantitative Analyst",
+  title: "Pratyush Landekar | Portfolio",
   description: "Portfolio of Pratyush Landekar — MBA Tech dual-degree candidate at MPSTME, NMIMS Mumbai. Specializing in multi-agent AI swarms, enterprise data automation pipelines, and high-performance full-stack architectures.",
   keywords: [
     "Pratyush Landekar",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pratyush Landekar | AI Systems Engineer",
+    title: "Pratyush Landekar",
     description: "Multi-Agent AI Swarms, Enterprise Automation, and Full-Stack Engineering.",
   },
 };
@@ -56,7 +56,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Pratyush Landekar",
-    "jobTitle": "AI Systems Engineer",
+    "jobTitle": "Engineer",
     "alumniOf": {
       "@type": "EducationalOrganization",
       "name": "Mukesh Patel School of Technology Management & Engineering (NMIMS)"

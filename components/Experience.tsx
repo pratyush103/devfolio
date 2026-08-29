@@ -22,10 +22,10 @@ export default function Experience() {
         <div>
           <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 02. Professional Track</span>
           <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Industry Engagements
+            Experience
           </h2>
           <p className="text-slate-400 text-base sm:text-lg mt-3 max-w-2xl">
-            Quantitative inventory modeling at Fortune 100 enterprise scale, automated educational AI courseware engines, and full-stack platforms.
+            Working on inventory data modeling at enterprise scale, building educational AI tools, and developing full-stack platforms.
           </p>
         </div>
 
