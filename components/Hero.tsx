@@ -73,7 +73,6 @@ export default function Hero({ onOpenContact }: { onOpenContact?: () => void }) 
       </div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400 text-xs font-mono uppercase tracking-widest animate-bounce">
-        <span>Scroll to explore deeper layers</span>
         <ArrowDown className="w-4 h-4" />
       </div>
     </section>

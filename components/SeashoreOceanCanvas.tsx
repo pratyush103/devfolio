@@ -478,9 +478,10 @@ export default function SeashoreOceanCanvas() {
       window.addEventListener("touchmove", handleTouchMove, { passive: true });
       window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("click", handleClick);
-      window.addEventListener("pointerdown", handleBHPointerDown);
-      window.addEventListener("pointerup", handleBHPointerUp);
-      window.addEventListener("pointermove", handleBHPointerMove);
+      window.addEventListener("pointerdown", handleBHPointerDown, { passive: false });
+      window.addEventListener("pointerup", handleBHPointerUp, { passive: false });
+      window.addEventListener("pointercancel", handleBHPointerUp, { passive: false });
+      window.addEventListener("pointermove", handleBHPointerMove, { passive: false });
 
       handleScroll();
       animate();
@@ -721,11 +722,13 @@ export default function SeashoreOceanCanvas() {
       if (bhState === 'sun' && bhIsSunHit(e.clientX, e.clientY)) {
         bhIsHolding = true;
         bhHoldStartTime = performance.now();
+        if (e.cancelable) e.preventDefault();
       } else if (bhState === 'blackhole' && bhIsNearHole(e.clientX, e.clientY)) {
         bhIsDragging = true;
         const s = bhWorldPos.clone().project(camera);
         bhDragOffsetX = e.clientX - (s.x + 1) / 2 * width;
         bhDragOffsetY = e.clientY - (-s.y + 1) / 2 * height;
+        if (e.cancelable) e.preventDefault();
       }
     }
 
@@ -743,10 +746,13 @@ export default function SeashoreOceanCanvas() {
 
     function handleBHPointerMove(e: PointerEvent) {
       if (bhIsDragging && bhState === 'blackhole') {
+        if (e.cancelable) e.preventDefault();
         const tx = e.clientX - bhDragOffsetX;
         const ty = e.clientY - bhDragOffsetY;
         bhWorldPos.copy(bhScreenToWorld(tx, ty));
         bhClampToViewport();
+      } else if (bhIsHolding && (bhState === 'sun' || bhState === 'collapsing')) {
+        if (e.cancelable) e.preventDefault();
       }
     }
 
@@ -1386,6 +1392,7 @@ export default function SeashoreOceanCanvas() {
       window.removeEventListener("click", handleClick);
       window.removeEventListener("pointerdown", handleBHPointerDown);
       window.removeEventListener("pointerup", handleBHPointerUp);
+      window.removeEventListener("pointercancel", handleBHPointerUp);
       window.removeEventListener("pointermove", handleBHPointerMove);
       if (bhRenderTarget) bhRenderTarget.dispose();
       if (bhLensingMaterial) bhLensingMaterial.dispose();
@@ -1399,7 +1406,7 @@ export default function SeashoreOceanCanvas() {
     <>
       <div
         ref={containerRef}
-        className="fixed inset-0 w-full h-full pointer-events-none z-0"
+        className="fixed inset-0 w-full h-full pointer-events-none z-0 touch-none"
         aria-hidden="true"
       />
 
