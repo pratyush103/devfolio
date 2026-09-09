@@ -1411,7 +1411,7 @@ export default function SeashoreOceanCanvas() {
       />
 
       {/* Sliding Indicator Theme Switcher (Top Left) */}
-      <div className="fixed top-20 left-6 z-40 inline-flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg max-w-[calc(100vw-3rem)]">
+      <div className="fixed top-20 left-6 md:left-16 z-40 inline-flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg max-w-[calc(100vw-3rem)]">
         {/* Animated Sliding Background Highlight Pill */}
         <div
           className="absolute top-1 bottom-1 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md"

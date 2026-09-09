@@ -6,7 +6,7 @@ export default function About() {
   return (
     <section id="about" className="max-w-6xl mx-auto px-6 py-24 relative z-10">
       <div className="mb-12">
-        <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 01. Domain Architecture</span>
+        <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 01. My Focus</span>
         <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
           Building with AI &amp; Data
         </h2>
@@ -15,27 +15,11 @@ export default function About() {
         </p>
       </div>
 
+
       {/* Domain Artifacts replacing generic icon boxes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Artifact 1: LangGraph State Machine */}
-        <div className="p-6 rounded-xl bg-slate-900/60 backdrop-blur-xl border border-cyanAccent/20 hover:border-cyanAccent/50 transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between font-mono text-[11px] text-tealAccent uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
-              <span>LangGraph Topology</span>
-              <span className="text-slate-500">v0.2</span>
-            </div>
-            <div className="bg-[#030712]/90 rounded-lg p-3 font-mono text-[11px] text-slate-300 mb-4 border border-white/5 space-y-1">
-              <div><span className="text-cyanAccent">[Supervisor]</span> ──► <span className="text-amber-300">Router</span></div>
-              <div className="pl-4 text-slate-400">├── <span className="text-tealAccent">IndAS_Auditor</span> (RAG)</div>
-              <div className="pl-4 text-slate-400">└── <span className="text-tealAccent">ForecastNode</span> (Variance)</div>
-              <div><span className="text-slate-500">Trace Latency:</span> <span className="text-tealAccent">1.4s (LangSmith)</span></div>
-            </div>
-            <h3 className="font-heading text-base font-bold text-white mb-1">Stateful Agent Graphs</h3>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              Cyclical state graphs with LangGraph, deterministic routing, and structured schema verification.
-            </p>
-          </div>
-        </div>
+        
+        
 
         {/* Artifact 2: In-Memory Order Book */}
         <div className="p-6 rounded-xl bg-slate-900/60 backdrop-blur-xl border border-cyanAccent/20 hover:border-cyanAccent/50 transition-all flex flex-col justify-between">
@@ -101,9 +85,9 @@ export default function About() {
         </div>
 
         <div className="p-3 rounded-lg bg-white/5 border border-white/5 font-mono">
-          <div className="text-[10px] text-slate-400 uppercase mb-1">Academic Rank</div>
-          <div className="text-white font-bold text-xs">CGPA: {profileData.cgpa}</div>
-          <div className="text-[10px] text-cyanAccent mt-0.5">MPSTME, NMIMS</div>
+          <div className="text-[10px] text-slate-400 uppercase mb-1">Education</div>
+          <div className="text-white font-bold text-xs">B.Tech + MBA</div>
+          <div className="text-[10px] text-cyanAccent mt-0.5">NMIMS Mumbai</div>
         </div>
 
         <div className="p-3 rounded-lg bg-white/5 border border-white/5 font-mono">

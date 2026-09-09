@@ -10,7 +10,6 @@ export default function Hero({ onOpenContact }: { onOpenContact?: () => void }) 
       <div className="max-w-3xl">
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md theme-bg-badge border border-cyanAccent/30 text-xs font-mono font-semibold uppercase tracking-wider theme-text-primary">
-            <span className="w-2 h-2 rounded-sm bg-current animate-pulse" />
             {profileData.tagline}
           </div>
 
@@ -37,7 +36,7 @@ export default function Hero({ onOpenContact }: { onOpenContact?: () => void }) 
             className="px-6 py-3 rounded-lg font-mono font-bold text-xs uppercase tracking-wider text-[#030712] bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-cyanAccent/20 flex items-center gap-2"
           >
             <FolderGit2 className="w-4 h-4" />
-            View Architectures
+            View Projects
           </a>
 
           {onOpenContact && (

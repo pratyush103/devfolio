@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { profileData } from '@/data/profile';
-import { Code, ExternalLink, Menu, X, Mail, Search, FileText } from 'lucide-react';
+import { Code, ExternalLink, Menu, X, Mail, FileText } from 'lucide-react';
 
 const navItems = [
   { label: 'About', href: '#about' },
@@ -14,11 +14,10 @@ const navItems = [
 
 interface NavbarProps {
   onOpenContact?: () => void;
-  onOpenSearch?: () => void;
   onOpenResume?: () => void;
 }
 
-export default function Navbar({ onOpenContact, onOpenSearch, onOpenResume }: NavbarProps) {
+export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -45,15 +44,15 @@ export default function Navbar({ onOpenContact, onOpenSearch, onOpenResume }: Na
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-[#030712]/50 border-b border-white/5 transition-all">
-      <nav className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
-        <a href="#hero" className="flex items-center gap-2 font-heading font-bold text-xl text-white tracking-tight">
+    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-[#030712]/85 border-b border-white/10 transition-all">
+      <nav className="w-full px-6 md:px-10 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
+        <a href="#hero" className="justify-self-start flex items-center gap-2 font-heading font-bold text-xl text-white tracking-tight">
           <Code className="w-5 h-5 theme-text-primary" />
           <span>Pratyush<span className="theme-text-primary">.dev</span></span>
         </a>
 
         {/* Desktop Links */}
-        <ul className="hidden md:flex items-center gap-8 text-sm font-medium">
+        <ul className="hidden md:flex justify-self-center items-center gap-8 lg:gap-10 text-sm font-medium">
           {navItems.map((item) => {
             const sectionId = item.href.replace('#', '');
             const isActive = activeSection === sectionId;
@@ -62,7 +61,7 @@ export default function Navbar({ onOpenContact, onOpenSearch, onOpenResume }: Na
                 <a
                   href={item.href}
                   className={`transition-colors relative py-1 ${
-                    isActive ? 'theme-text-primary font-semibold' : 'text-slate-400 hover:text-slate-200'
+                    isActive ? 'theme-text-primary font-semibold' : 'text-slate-300 hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -75,19 +74,8 @@ export default function Navbar({ onOpenContact, onOpenSearch, onOpenResume }: Na
           })}
         </ul>
 
-        <div className="flex items-center gap-3">
-          {/* Search Trigger */}
-          {onOpenSearch && (
-            <button
-              onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-400 bg-white/5 border border-white/10 hover:border-cyanAccent/40 hover:text-white transition-all"
-              title="Search Portfolio (Ctrl+K / Cmd+K)"
-            >
-              <Search className="w-3.5 h-3.5 theme-text-primary" />
-              <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-slate-300">⌘K</kbd>
-            </button>
-          )}
+        <div className="justify-self-end flex items-center gap-3">
+
 
           {/* Resume Overview Button */}
           {onOpenResume && (
