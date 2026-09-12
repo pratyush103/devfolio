@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { profileData } from '@/data/profile';
-import { Code, ExternalLink, Menu, X, Mail, FileText } from 'lucide-react';
+import { Code, ExternalLink, Menu, X, Mail, FileText, Palette } from 'lucide-react';
 
 const navItems = [
   { label: 'About', href: '#about' },
@@ -20,6 +20,9 @@ interface NavbarProps {
 export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  useEffect(() => {
+    // Theme is now managed globally at page.tsx, but Navbar could still know about it if needed.
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,15 +47,15 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-[#030712]/85 border-b border-white/10 transition-all">
+    <header className="fixed top-0 left-0 w-full z-50 bg-primary/55 supports-[backdrop-filter]:bg-primary/45 backdrop-blur-2xl backdrop-saturate-150 border-b border-rule shadow-[0_8px_28px_rgba(3,7,18,0.28)] transition-all">
       <nav className="w-full px-6 md:px-10 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
         <a href="#hero" className="justify-self-start flex items-center gap-2 font-heading font-bold text-xl text-white tracking-tight">
-          <Code className="w-5 h-5 theme-text-primary" />
-          <span>Pratyush<span className="theme-text-primary">.dev</span></span>
+          <Code className="w-5 h-5 text-cyanAccent" />
+          <span>Pratyush<span className="text-cyanAccent">.dev</span></span>
         </a>
 
         {/* Desktop Links */}
-        <ul className="hidden md:flex justify-self-center items-center gap-8 lg:gap-10 text-sm font-medium">
+        <ul className="hidden md:flex justify-self-center items-center gap-8 lg:gap-10 text-sm font-sans font-medium">
           {navItems.map((item) => {
             const sectionId = item.href.replace('#', '');
             const isActive = activeSection === sectionId;
@@ -61,12 +64,12 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
                 <a
                   href={item.href}
                   className={`transition-colors relative py-1 ${
-                    isActive ? 'theme-text-primary font-semibold' : 'text-slate-300 hover:text-white'
+                    isActive ? 'text-cyanAccent font-semibold' : 'text-textMuted hover:text-white'
                   }`}
                 >
                   {item.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-full" />
+                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-cyanAccent rounded-full" />
                   )}
                 </a>
               </li>
@@ -76,14 +79,13 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
 
         <div className="justify-self-end flex items-center gap-3">
 
-
           {/* Resume Overview Button */}
           {onOpenResume && (
             <button
               onClick={onOpenResume}
-              className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-300 bg-white/5 border border-white/10 hover:border-cyanAccent/40 hover:text-cyanAccent transition-all"
+              className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-textMuted bg-secondary border border-rule hover:border-cyanAccent/40 hover:text-cyanAccent transition-all"
             >
-              <FileText className="w-3.5 h-3.5 theme-text-secondary" />
+              <FileText className="w-3.5 h-3.5 text-cyanAccent" />
               <span>Resume</span>
             </button>
           )}
@@ -91,7 +93,7 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
           {onOpenContact && (
             <button
               onClick={onOpenContact}
-              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono font-semibold text-slate-300 bg-white/5 border border-white/10 hover:border-cyanAccent/40 hover:text-cyanAccent transition-all"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono font-semibold text-textMuted bg-secondary border border-rule hover:border-cyanAccent/40 hover:text-cyanAccent transition-all"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Contact</span>
@@ -102,7 +104,7 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
             href={profileData.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 rounded-lg text-xs font-mono font-semibold text-white bg-gradient-to-r from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 border border-[var(--accent-primary)]/40 hover:from-[var(--accent-primary)] hover:to-[var(--accent-secondary)] hover:text-primary transition-all duration-300 shadow-sm flex items-center gap-1.5"
+            className="px-4 py-2 rounded-lg text-xs font-mono font-semibold text-primary bg-cyanAccent border border-cyanAccent hover:bg-[#b07835] transition-all duration-300 shadow-sm flex items-center gap-1.5"
           >
             <span>Connect</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -111,23 +113,23 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-slate-400 hover:text-white p-1"
+            className="md:hidden text-textMuted hover:text-white p-1"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 theme-text-primary" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 text-cyanAccent" />}
           </button>
         </div>
       </nav>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#030712]/95 border-b border-white/10 px-6 py-4 flex flex-col gap-4 backdrop-blur-xl">
+        <div className="md:hidden bg-primary/95 border-b border-rule px-6 py-4 flex flex-col gap-4 backdrop-blur-xl">
           {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-300 hover:theme-text-primary py-1 text-sm font-medium"
+              className="text-textMuted hover:text-cyanAccent py-1 text-sm font-sans font-medium"
             >
               {item.label}
             </a>
@@ -138,7 +140,7 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
                 setMobileMenuOpen(false);
                 onOpenResume();
               }}
-              className="text-left theme-text-secondary py-1 text-sm font-mono font-medium flex items-center gap-2"
+              className="text-left text-textMuted py-1 text-sm font-mono font-medium flex items-center gap-2"
             >
               <FileText className="w-4 h-4" />
               <span>View Executive CV</span>
@@ -150,7 +152,7 @@ export default function Navbar({ onOpenContact, onOpenResume }: NavbarProps) {
                 setMobileMenuOpen(false);
                 onOpenContact();
               }}
-              className="text-left theme-text-primary py-1 text-sm font-mono font-medium flex items-center gap-2"
+              className="text-left text-cyanAccent py-1 text-sm font-mono font-medium flex items-center gap-2"
             >
               <Mail className="w-4 h-4" />
               <span>Contact Pratyush</span>

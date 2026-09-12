@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { VolumeX, Palette } from 'lucide-react';
 
-export default function AudioSynthesizer() {
+interface AudioSynthesizerProps {
+  onCycleTheme?: () => void;
+}
+
+export default function AudioSynthesizer({ onCycleTheme }: AudioSynthesizerProps) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -101,7 +105,7 @@ export default function AudioSynthesizer() {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (pannerNodeRef.current && audioCtxRef.current) {
-        const panValue = (e.clientX / window.innerWidth) * 2 - 1; // -1 to +1
+        const panValue = (e.clientX / window.innerWidth) * 2 - 1;
         pannerNodeRef.current.pan.setTargetAtTime(panValue * 0.45, audioCtxRef.current.currentTime, 0.1);
       }
     };
@@ -115,31 +119,40 @@ export default function AudioSynthesizer() {
   }, []);
 
   return (
-    <button
-      onClick={toggleAudio}
-      className={`fixed bottom-6 right-6 z-50 p-3 rounded-full backdrop-blur-xl border transition-all shadow-xl flex items-center gap-2 text-xs font-semibold ${
-        isPlaying
-          ? 'bg-cyanAccent/15 border-cyanAccent text-cyanAccent shadow-cyanAccent/20'
-          : 'bg-[#081226]/80 border-cyanAccent/30 text-slate-300 hover:text-white hover:border-cyanAccent'
-      }`}
-      title={isPlaying ? 'Mute Oceanic Ambience' : 'Play Ambient Ocean Sound'}
-      aria-label="Toggle ambient oceanic soundscape"
-    >
-      {isPlaying ? (
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-end gap-0.5 h-3.5 w-3.5">
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+      {/* Theme Toggle */}
+      {onCycleTheme && (
+        <button
+          onClick={onCycleTheme}
+          className="p-3 rounded-full backdrop-blur-xl border transition-all shadow-xl bg-secondary/80 border-rule text-textMuted hover:text-cyanAccent hover:border-cyanAccent/40"
+          title="Cycle Theme"
+          aria-label="Cycle theme"
+        >
+          <Palette className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Sound Toggle */}
+      <button
+        onClick={toggleAudio}
+        className={`p-3 rounded-full backdrop-blur-xl border transition-all shadow-xl ${
+          isPlaying
+            ? 'bg-cyanAccent/15 border-cyanAccent text-cyanAccent shadow-cyanAccent/20'
+            : 'bg-secondary/80 border-rule text-textMuted hover:text-textMain hover:border-cyanAccent/40'
+        }`}
+        title={isPlaying ? 'Mute Oceanic Ambience' : 'Play Ambient Ocean Sound'}
+        aria-label="Toggle ambient oceanic soundscape"
+      >
+        {isPlaying ? (
+          <div className="flex items-end gap-0.5 h-4 w-4">
             <span className="w-1 bg-cyanAccent animate-[pulse_0.8s_ease-in-out_infinite] h-full rounded-full" />
-            <span className="w-1 bg-tealAccent animate-[pulse_0.6s_ease-in-out_infinite_0.2s] h-2/3 rounded-full" />
+            <span className="w-1 bg-textMuted animate-[pulse_0.6s_ease-in-out_infinite_0.2s] h-2/3 rounded-full" />
             <span className="w-1 bg-cyanAccent animate-[pulse_1.0s_ease-in-out_infinite_0.4s] h-4/5 rounded-full" />
           </div>
-          <span className="hidden sm:inline font-mono">Binaural Ambience</span>
-        </div>
-      ) : (
-        <>
-          <VolumeX className="w-4 h-4 text-slate-400" />
-          <span className="hidden sm:inline">Soundscape</span>
-        </>
-      )}
-    </button>
+        ) : (
+          <VolumeX className="w-4 h-4" />
+        )}
+      </button>
+    </div>
   );
 }

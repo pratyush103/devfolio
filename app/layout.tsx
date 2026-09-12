@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const sansFont = Plus_Jakarta_Sans({
+const sansFont = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
-const headingFont = Space_Grotesk({
+const headingFont = Fraunces({
   subsets: ["latin"],
+  axes: ["SOFT", "WONK"], // Pin to standard settings if possible, or just default axes
   variable: "--font-heading",
 });
 
-const monoFont = JetBrains_Mono({
+const monoFont = IBM_Plex_Mono({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-mono",
 });
 
@@ -84,7 +86,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-primary text-slate-100 font-sans antialiased selection:bg-cyanAccent selection:text-primary">
+      <body className="bg-primary text-textMain font-sans antialiased selection:bg-cyanAccent selection:text-primary">
         {children}
       </body>
     </html>

@@ -3,15 +3,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-export default function SeashoreOceanCanvas() {
+export default function SeashoreOceanCanvas({ onPaletteRefReady }: { onPaletteRefReady?: (fn: (mode: "twilight" | "biolum" | "golden" | "mono") => void) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [automataActive, setAutomataActive] = useState<boolean>(false);
   const [currentPatternName, setCurrentPatternName] =
     useState<string>("Snapped Particles");
   const [paletteMode, setPaletteMode] = useState<
     "twilight" | "biolum" | "golden" | "mono"
-  >("twilight");
+  >("golden");
   const [hudCollapsed, setHudCollapsed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (automataActive) {
+      setHudCollapsed(false);
+      const timer = setTimeout(() => setHudCollapsed(true), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [automataActive]);
 
   const triggerPatternRef = useRef<((name: string) => void) | null>(null);
   const setPaletteRef = useRef<
@@ -110,7 +118,7 @@ export default function SeashoreOceanCanvas() {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    let activePalette: "twilight" | "biolum" | "golden" | "mono" = "twilight";
+    let activePalette: "twilight" | "biolum" | "golden" | "mono" = "golden";
 
     // Three.js Color Lerping Targets
     const currentSunColor = new THREE.Color(0xf97316);
@@ -1382,6 +1390,14 @@ export default function SeashoreOceanCanvas() {
     }
 
     init();
+    applyTheme("golden");
+
+    // Expose palette setter to parent
+    if (onPaletteRefReady) {
+      onPaletteRefReady((mode: "twilight" | "biolum" | "golden" | "mono") => {
+        applyTheme(mode);
+      });
+    }
 
     return () => {
       cancelAnimationFrame(animationFrameId);
@@ -1410,79 +1426,7 @@ export default function SeashoreOceanCanvas() {
         aria-hidden="true"
       />
 
-      {/* Sliding Indicator Theme Switcher (Top Left) */}
-      <div className="fixed top-20 left-6 md:left-16 z-40 inline-flex items-center p-1 rounded-full bg-[#081226]/85 border border-cyanAccent/30 backdrop-blur-xl shadow-lg max-w-[calc(100vw-3rem)]">
-        {/* Animated Sliding Background Highlight Pill */}
-        <div
-          className="absolute top-1 bottom-1 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-md"
-          style={{
-            left:
-              paletteMode === "twilight"
-                ? "4px"
-                : paletteMode === "biolum"
-                ? "62px"
-                : paletteMode === "golden"
-                ? "120px"
-                : "178px",
-            width: "58px",
-            backgroundColor:
-              paletteMode === "twilight"
-                ? "#38bdf8"
-                : paletteMode === "biolum"
-                ? "#10b981"
-                : paletteMode === "golden"
-                ? "#f59e0b"
-                : "#ffffff",
-          }}
-        />
-
-        <button
-          onClick={() =>
-            setPaletteRef.current && setPaletteRef.current("twilight")
-          }
-          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === "twilight"
-              ? "text-[#030712]"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          Twilight
-        </button>
-        <button
-          onClick={() =>
-            setPaletteRef.current && setPaletteRef.current("biolum")
-          }
-          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === "biolum"
-              ? "text-[#030712]"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          Biolum
-        </button>
-        <button
-          onClick={() =>
-            setPaletteRef.current && setPaletteRef.current("golden")
-          }
-          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === "golden"
-              ? "text-[#030712]"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          Golden
-        </button>
-        <button
-          onClick={() => setPaletteRef.current && setPaletteRef.current("mono")}
-          className={`relative z-10 w-[58px] py-1 text-center text-[10px] font-mono font-bold transition-colors duration-300 ${
-            paletteMode === "mono"
-              ? "text-[#030712]"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          Mono
-        </button>
-      </div>
+      {/* Theme Switcher has been moved to Navbar */}
 
       {/* Cellular Automata HUD Controls when active */}
       {automataActive && (
@@ -1583,10 +1527,6 @@ export default function SeashoreOceanCanvas() {
               </button>
             </div>
 
-            <div className="text-[10px] text-white/55 font-sans pt-1 border-t border-white/5">
-              Click 3x anywhere to toggle • Phased wave calming &amp; snap
-              transition
-            </div>
           </div>
         </div>
       )}

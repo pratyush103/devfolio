@@ -22,9 +22,8 @@ export const experiencesData: ExperienceItem[] = [
     metrics: "ABC/XYZ Variance Segmentation",
     tools: ["Power Automate", "Power Apps", "SAP HANA", "Python", "VBA"],
     points: [
-      "Built automated workflows using Power Automate and custom NLP parsers to help process unstructured logistics emails into SAP.",
-      "Worked on forecast variance modeling across regional hubs, using inventory segmentation to help optimize stock levels.",
-      "Constructed tracking models to identify supply chain bottlenecks, helping the team separate recoverable costs from general operational expenses."
+      "Governed NLP agent workflows to convert unstructured logistics emails into SAP-ready records.",
+      "Used ABC/XYZ variance segmentation to tighten forecast accuracy across regional hubs."
     ]
   },
   {
@@ -58,6 +57,7 @@ export const projectsData: ProjectItem[] = [
     id: "finsight",
     title: "FinSight",
     description: "Multi-agent research platform using LLMs to parse and organize statutory filings with accurate citations.",
+    scope: "Personal Build",
     category: "ai",
     tags: ["LangGraph", "FastAPI", "Next.js", "LangSmith", "Python"],
     githubUrl: "https://github.com/pratyush103",
@@ -78,6 +78,7 @@ export const projectsData: ProjectItem[] = [
     id: "onpaper",
     title: "OnPaper",
     description: "Cross-platform paper trading suite combining a native Tauri desktop container with an in-memory .NET 8 WebAPI matching engine for low-latency simulation.",
+    scope: "Personal Build",
     category: "fullstack",
     tags: ["React + Tauri", ".NET 8 WebAPI", "Azure", "WebSocket"],
     githubUrl: "https://github.com/pratyush103",
@@ -98,6 +99,7 @@ export const projectsData: ProjectItem[] = [
     id: "insight-forge",
     title: "Insight Forge",
     description: "An intelligent pipeline that automatically profiles tabular data and generates interactive visualizations, saving you from manual setup.",
+    scope: "Hackathon Entry",
     category: "ai",
     tags: ["LangGraph", "Streamlit", "Ollama", "Python"],
     githubUrl: "https://github.com/pratyush103",
@@ -118,6 +120,7 @@ export const projectsData: ProjectItem[] = [
     id: "supply-chain-analytics",
     title: "Enterprise Demand Forecasting",
     description: "Forecast variance analyzer using inventory segmentation and automated exception routing for enterprise logistics.",
+    scope: "Internship Deliverable",
     category: "analytics",
     tags: ["Power Automate", "SAP HANA", "Python", "Excel/VBA"],
     githubUrl: "https://github.com/pratyush103",

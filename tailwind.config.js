@@ -8,17 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#030712",
-        secondary: "#081226",
-        cyanAccent: "#38bdf8",
-        tealAccent: "#2dd4bf",
-        sunOrange: "#f97316",
-        sunGlow: "#fb923c",
-        deepViolet: "#818cf8",
+        primary: "var(--bg-main)",
+        secondary: "var(--bg-surface)",
+        cyanAccent: "var(--accent-primary)",
+        tealAccent: "var(--accent-secondary)",
+        textMain: "var(--text-main)",
+        textMuted: "var(--text-muted)",
+        rule: "var(--rule)",
+        sunOrange: "var(--accent-sun)",
+        sunGlow: "var(--accent-sun-glow)",
+        deepViolet: "var(--accent-violet)",
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'sans-serif'],
-        heading: ['var(--font-heading)', 'sans-serif'],
+        heading: ['var(--font-heading)', 'serif'],
         mono: ['var(--font-mono)', 'monospace'],
       },
     },

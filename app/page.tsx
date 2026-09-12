@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SeashoreOceanCanvas from '@/components/SeashoreOceanCanvas';
 import CausticsOverlay from '@/components/CausticsOverlay';
 import Navbar from '@/components/Navbar';
@@ -21,6 +21,24 @@ export default function Home() {
   const [contactOpen, setContactOpen] = useState<boolean>(false);
   const [resumeOpen, setResumeOpen] = useState<boolean>(false);
 
+  // Theme Sync
+  const [theme, setTheme] = useState<'golden'|'twilight'|'biolum'|'mono'>('golden');
+  const paletteFnRef = useRef<((mode: 'golden'|'twilight'|'biolum'|'mono') => void) | null>(null);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const cycleTheme = () => {
+    const themes: ('golden'|'twilight'|'biolum'|'mono')[] = ['golden', 'twilight', 'biolum', 'mono'];
+    const idx = themes.indexOf(theme);
+    const nextTheme = themes[(idx + 1) % themes.length];
+    setTheme(nextTheme);
+    if (paletteFnRef.current) {
+      paletteFnRef.current(nextTheme);
+    }
+  };
+
 
 
   return (
@@ -29,7 +47,7 @@ export default function Home() {
       <ReadingProgress />
 
       {/* 3D WebGL Canvas Layer */}
-      <SeashoreOceanCanvas />
+      <SeashoreOceanCanvas onPaletteRefReady={(fn) => { paletteFnRef.current = fn; }} />
       <CausticsOverlay />
 
       {/* Foreground UI Layer */}
@@ -48,7 +66,7 @@ export default function Home() {
       </div>
 
       {/* Oceanic Ambient Audio Synthesizer */}
-      <AudioSynthesizer />
+      <AudioSynthesizer onCycleTheme={cycleTheme} />
 
       {/* Quick Contact Modal */}
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />

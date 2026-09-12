@@ -21,6 +21,7 @@ export interface ProjectItem {
   liveUrl?: string;
   iconName: string;
   metrics?: string;
+  scope?: string;
   longDescription?: string;
   architectureHighlights?: string[];
   keyOutcomes?: string[];

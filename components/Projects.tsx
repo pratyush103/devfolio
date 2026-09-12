@@ -23,11 +23,10 @@ export default function Projects() {
     <section id="projects" className="max-w-6xl mx-auto px-6 py-24 relative z-10">
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <span className="font-mono text-xs text-cyanAccent tracking-widest uppercase block mb-2">// 03. Selected Works</span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-textMain tracking-tight">
             Featured Projects
           </h2>
-          <p className="text-slate-400 text-base sm:text-lg mt-3 max-w-2xl">
+          <p className="text-textMuted text-base sm:text-lg mt-3 max-w-2xl font-sans">
             Stateful multi-agent systems, low-latency trading simulation engines, and automated statistical intelligence.
           </p>
         </div>
@@ -38,10 +37,10 @@ export default function Projects() {
             <button
               key={cat.value}
               onClick={() => setSelectedCat(cat.value)}
-              className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-sans text-xs font-semibold transition-all ${
                 selectedCat === cat.value
-                  ? 'bg-[var(--accent-primary)] text-[#030712] shadow-md'
-                  : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-cyanAccent/30'
+                  ? 'bg-cyanAccent text-primary shadow-md'
+                  : 'bg-secondary border border-rule text-textMuted hover:text-textMain hover:border-cyanAccent/30'
               }`}
             >
               {cat.label}
@@ -60,14 +59,14 @@ export default function Projects() {
               onClick={() => setActiveModalProject(proj)}
               className={`p-6 rounded-xl backdrop-blur-xl border transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-1 ${
                 isFeatured
-                  ? 'bg-slate-900/80 border-[var(--accent-primary)]/50 shadow-xl shadow-cyanAccent/10 md:col-span-2 lg:col-span-2'
-                  : 'bg-slate-900/60 border-white/10 hover:border-cyanAccent/40'
+                  ? 'bg-secondary border-cyanAccent/50 shadow-xl shadow-cyanAccent/10 md:col-span-2 lg:col-span-2'
+                  : 'bg-secondary border-rule hover:border-cyanAccent/40'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-tealAccent font-semibold bg-tealAccent/10 px-2 py-0.5 rounded-[3px] border border-tealAccent/20">
-                    {proj.metrics}
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-cyanAccent font-semibold bg-cyanAccent/10 px-2 py-0.5 rounded-[3px] border border-cyanAccent/20">
+                    {proj.scope || proj.metrics}
                   </span>
                   {proj.githubUrl && (
                     <span
@@ -75,7 +74,7 @@ export default function Projects() {
                         e.stopPropagation();
                         window.open(proj.githubUrl, '_blank', 'noopener,noreferrer');
                       }}
-                      className="text-slate-400 hover:text-white transition-colors"
+                      className="text-textMuted hover:text-textMain transition-colors"
                       title="View GitHub Repository"
                     >
                       <Github className="w-4 h-4" />
@@ -83,11 +82,11 @@ export default function Projects() {
                   )}
                 </div>
 
-                <h3 className="font-heading text-xl sm:text-2xl font-bold text-white mb-2 group-hover:theme-text-primary transition-colors flex items-center justify-between">
+                <h3 className="font-heading text-xl sm:text-2xl font-bold text-textMain mb-2 group-hover:text-cyanAccent transition-colors flex items-center justify-between">
                   <span>{proj.title}</span>
-                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity theme-text-primary" />
+                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-cyanAccent" />
                 </h3>
-                <p className="text-slate-300 text-sm leading-relaxed mb-6 font-sans">
+                <p className="text-textMuted text-sm leading-relaxed mb-6 font-sans">
                   {proj.description}
                 </p>
               </div>
@@ -96,7 +95,7 @@ export default function Projects() {
                 {proj.tags.map((tag, tIndex) => (
                   <span
                     key={tIndex}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-[4px] bg-white/5 text-slate-300 border border-white/10"
+                    className="text-[11px] font-mono px-2 py-0.5 rounded-[4px] bg-primary text-textMuted border border-rule"
                   >
                     {tag}
                   </span>
@@ -114,25 +113,25 @@ export default function Projects() {
           onClick={() => setActiveModalProject(null)}
         >
           <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#081226] border border-cyanAccent/40 rounded-2xl p-8 shadow-2xl shadow-cyanAccent/20"
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-primary border border-cyanAccent/40 rounded-2xl p-8 shadow-2xl shadow-cyanAccent/20"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setActiveModalProject(null)}
-              className="absolute top-6 right-6 w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+              className="absolute top-6 right-6 w-8 h-8 rounded-lg bg-secondary border border-rule flex items-center justify-center text-textMuted hover:text-textMain transition-all"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="text-xs font-mono uppercase tracking-widest text-tealAccent font-semibold mb-2">
-              {activeModalProject.metrics}
+            <div className="text-xs font-mono uppercase tracking-widest text-cyanAccent font-semibold mb-2">
+              {activeModalProject.scope || activeModalProject.metrics}
             </div>
 
-            <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white mb-4">
+            <h3 className="font-heading text-2xl sm:text-3xl font-bold text-textMain mb-4">
               {activeModalProject.title}
             </h3>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 font-sans">
+            <p className="text-textMuted text-sm sm:text-base leading-relaxed mb-6 font-sans">
               {activeModalProject.longDescription || activeModalProject.description}
             </p>
 
@@ -140,13 +139,13 @@ export default function Projects() {
 
             {activeModalProject.architectureHighlights && (
               <div className="mb-6">
-                <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+                <h4 className="font-sans text-xs font-bold text-cyanAccent uppercase tracking-wider mb-3">
                   Project Highlights
                 </h4>
                 <ul className="space-y-2.5">
                   {activeModalProject.architectureHighlights.map((item, idx) => (
-                    <li key={idx} className="text-slate-300 text-sm flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-tealAccent shrink-0 mt-0.5" />
+                    <li key={idx} className="text-textMuted text-sm flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-cyanAccent shrink-0 mt-0.5" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -155,14 +154,14 @@ export default function Projects() {
             )}
 
             <div className="mb-6">
-              <h4 className="font-mono text-xs font-bold theme-text-primary uppercase tracking-wider mb-3">
+              <h4 className="font-sans text-xs font-bold text-cyanAccent uppercase tracking-wider mb-3">
                 Stack Components
               </h4>
               <div className="flex flex-wrap gap-1.5">
                 {activeModalProject.tags.map((tag, tIdx) => (
                   <span
                     key={tIdx}
-                    className="text-xs font-mono px-2.5 py-1 rounded-[4px] bg-white/5 text-slate-300 border border-white/10 font-semibold"
+                    className="text-xs font-mono px-2.5 py-1 rounded-[4px] bg-primary text-textMuted border border-rule font-semibold"
                   >
                     {tag}
                   </span>
@@ -170,13 +169,13 @@ export default function Projects() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-rule">
               {activeModalProject.githubUrl && (
                 <a
                   href={activeModalProject.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-lg font-mono text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-lg font-sans text-xs font-semibold text-textMain bg-secondary hover:bg-rule border border-rule transition-all flex items-center gap-2"
                 >
                   <Github className="w-4 h-4" />
                   View Repository
